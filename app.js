@@ -11,7 +11,7 @@ app.set("views", path.join(__dirname, "views"));
 
 const passport = require("passport");
 var connectEnsureLogin=require("connect-ensure-login");
-const session = require("express-session");
+var session = require('cookie-session')
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 
