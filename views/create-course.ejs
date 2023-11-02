@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title>Course create</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    
+</head>
+
+<body>
+    <header>
+        <%- include("header.ejs") %> 
+        <div class="flex justify-end">
+            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+        </div>
+    </header>
+    <div class="flex justify-end">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    </div>
+    
+     <div class="">
+        <form class=" flex flex-col items-center mt-8 border-2-grey-500-rounded " action="/create-course" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div>
+                <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Enter Course Title</label>
+                <input class="w-full p-2 mb-4 border border-gray-300 rounded focus:border-blue-500" type="text" name="title" placeholder="Enter Course Title" required>
+            </div>
+            <div>
+                <label for="description" class="block text-gray-700 text-sm font-bold mb-2 ">Enter Course Description</label>    
+                <input class="w-full p-2 mb-4 border border-gray-300 rounded focus:border-blue-500" type="text" name="description" placeholder="Enter Course Description" required>
+            </div>
+            <div class="flex justify-between items-center">
+                <button class="bg-blue-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" type="submit">Submit</button>
+            </div>
+            <br><hr><br>
+            <div class="text-center" >
+                <% if(messages && messages.success && messages.success.length > 0)  { %>
+                    <% for(var i=0; i<messages.success.length; i++) { %>
+                        <p class="rounded-full border-2 p-2 bg-gray-600 text-center text-white"> <%= messages.success[i] %></p>
+                    <% } %>
+                  <% } %>
+                <% if(messages && messages.error && messages.error.length > 0)  { %>
+                    <% for(var i=0; i<messages.error.length; i++) { %>
+                        <p class="rounded-full border-2 p-2 bg-gray-600 text-center text-white"> <%= messages.error[i] %></p>
+                    <% } %>
+                  <% } %>
+            </div>
+        </form>
+    </div>
+    <div>
+        <footer>
+            <%- include ('footer.ejs') %>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chapters</title>
+    <meta name="csrf-token" content="<%= csrfToken%>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <header>
+        <%- include("header.ejs") %>
+        <div class="flex justify-end">
+            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+        </div>
+    </header>
+    <div class="flex justify-end">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    </div>
+    
+    <div class="container mx-auto mt-8">
+        <div class="flex">
+            <div class="w-1/4">
+                <div class="mb-10 rounded-lg border border-gray-300 bg-white p-4">
+                    <h2 class="mb-2 text-lg font-bold"><%= courseTitle %></h2>
+                    <p class="text-gray-600">Educator: <%= educator %> </p>
+                    <p class="text-gray-600">description: <%= description %></p>
+                    <p class="text-gray-600">Enroll to access full course</p>
+                    <button onclick="enrollButtonClicked()" class="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Enroll</button>
+                </div>
+            </div>
+            <div class="w-3/4">
+                <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Chapters Covered in <%= courseTitle %></h1>
+                <div class="mx-11 gap-1">
+                    <% if (chapters.length > 0) { %>
+                        <% chapters.forEach(function(chapter) { %>
+                            <div class="relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
+                                <h2 class="mb-4 text-lg font-bold"><%= chapter.title %></h2>
+                                <div class="absolute bottom-6 right-7 mt-1 text-right">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                                 <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class=" col-span-2 mx-96 text-lg text-gray-600">No Chapters available.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <%- include("footer.ejs") %>
+    </footer>
+</body>
+</html>

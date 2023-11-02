@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Create Page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <style>
+      .left-column {
+          float: left;
+          width: 49%;
+          padding: 20px;
+          
+      }
+
+      .right-column {
+          float: left;
+          width: 50%;
+          padding: 20px;
+      }
+
+      .separator {
+          border-left: 1px solid #e2e2e2;
+          height: 100%;
+          position: absolute;
+      }
+
+      .wide-textarea {
+          width: 100%;
+      }
+
+      .page-titles {
+          list-style-type: none;
+          padding: 0;
+      }
+
+      .page-title-item {
+          margin-bottom: 10px;
+      }
+
+      .page-title {
+          font-weight: bold;
+          color: #007bff;
+          cursor: pointer;
+      }
+
+      .page-title:hover {
+          text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <header><%- include("header.ejs") %>
+      <div class="flex justify-end">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    </div>
+  </header>
+    <div class="flex justify-end">
+      <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+  </div>
+      <div class="separator">
+      </div>
+      <div class="left-column">
+        <h1 class="my-4 text-3xl font-semibold text-gray-800">ENTER PAGE CONTENTS</h1>
+        <form action="/create-page" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="mb-4">
+            <label for="title" class="block text-gray-600">Page Title:</label>
+            <input type="text" name="title" id="title" required class="w-96 rounded-lg border border-gray-300 px-4 py-2 transition duration-300 hover:border-blue-500 focus:border-blue-500 focus:outline-none" />
+          </div>
+          <div class="mb-4">
+            <label for="font" class="block text-gray-600">Select Font:</label>
+            <select name="font" id="font" class="w-96 rounded-lg border border-gray-300 px-4 py-2 transition duration-300 hover:border-blue-500 focus:border-blue-500 focus:outline-none">
+              <option value="Arial">Arial</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Verdana">Verdana</option>
+            </select>
+            <p>implementing feature</p>
+          </div>
+          <div class="mb-4">
+            <label for="content" class="block text-gray-600">Page Content:</label>
+            <textarea name="content" id="content" rows="10" required class="wide-textarea rounded-lg border border-gray-300 px-4 py-2 transition duration-300 hover:border-blue-500 focus:border-blue-500 focus:outline-none"></textarea>
+          </div>
+          <input type="hidden" name="chapterId" value="<%= chapterId %>" />
+          <div class="mb-4">
+            <button type="submit" class="w-96 rounded-md bg-blue-500 py-2 text-white transition duration-300 hover:bg-blue-600 focus:outline-none">Create Page</button>
+          </div>
+          <br><hr><br>
+          <div class="text-center" >
+            <% if(messages && messages.success && messages.success.length > 0)  { %>
+                  <% for(var i=0; i<messages.success.length; i++) { %>
+                      <p class="rounded-full border-2 p-2 bg-gray-600 text-center text-white"> <%= messages.success[i] %></p>
+                  <% } %>
+                <% } %>
+            <% if(messages && messages.error && messages.error.length > 0)  { %>
+                  <% for(var i=0; i<messages.error.length; i++) { %>
+                      <p class="rounded-full border-2 p-2 bg-gray-600 text-center text-white"> <%= messages.error[i] %></p>
+                  <% } %>
+                <% } %>
+          </div>
+        </form>
+      </div>
+      <!-- Right Column -->
+      <div class="right-column">
+        <h1 class="my-4 text-3xl font-semibold text-gray-800">PAGES IN THE CHAPTER </h1>
+        <ul class="page-titles">
+          <% pages.forEach(function(page, index) { %>
+          <li class="page-title-item">
+            <span class="page-title" onclick="showPage('<%= index %>')">Page <%= index + 1 %>: <%= page.title %></span>
+          </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      const pages = document.querySelectorAll(".page");
+
+      function showPage(pageIndex) {
+          pages.forEach((page, index) => {
+              if (index === pageIndex) {
+                  page.style.display = "block";
+              } else {
+                  page.style.display = "none";
+              }
+          });
+      }
+
+      showPage(1); 
+    </script>
+    <footer >
+      <%- include('footer.ejs') %></footer>
+  </body>
+</html>

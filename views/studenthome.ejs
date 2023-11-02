@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title>
+        <%= title %>
+    </title>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<header>
+    <%- include("header.ejs") %>
+    <div class="flex justify-end">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    </div>
+</header>
+<body class="bg-gray-100">
+    <div class="flex justify-end">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    </div>
+    <div class="container mx-auto mt-8">
+        <h1 class="text-3xl text-gray-800 mb-4">Student Homepage</h1>
+        <h3 class="text-2xl text-gray-800 ">Enrolled Courses</h3>
+        <%- include("display.ejs", { courses: courses, chapters: chapters, pages: pages }) %>
+    </div>
+    <footer>
+        <%- include('footer.ejs') %>
+    </footer>
+</body>
+</html>

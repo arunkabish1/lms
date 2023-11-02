@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter Pages</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex flex-col h-screen">
+    <div class="bg-blue-500 text-white text-center py-4">
+        <h1 class="text-3xl"><%= chapterName %></h1>
+    </div>
+    
+    <div class="flex-grow p-4 overflow-auto">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <p><%= pageContent %></p>
+        </div>
+    </div>
+    
+    <div class="bg-blue-500 p-4">
+        <div class="flex items-center justify-between">
+            <button class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">
+                Mark as Completed
+            </button>
+            <button class="bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-900">
+                Next
+            </button>
+        </div>
+    </div>
+</body>
+</html>
