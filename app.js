@@ -11,7 +11,7 @@ app.set("views", path.join(__dirname, "views"));
 
 const passport = require("passport");
 var connectEnsureLogin=require("connect-ensure-login");
-var session = require('cookie-session')
+var session = require('express-session')
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 
@@ -316,8 +316,8 @@ app.post("/users",async (req, res) => {
     return res.redirect("/signup");
   }
 
-  if (req.body.firstName.length == 0) {
-    req.flash("error", "Firstname must be filled!");
+  if (req.body.name.length == 0) {
+    req.flash("error", "Name must be filled!");
     return res.redirect("/signup");
   }
   if (req.body.password.length <= 8) {
