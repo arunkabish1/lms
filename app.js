@@ -135,7 +135,7 @@ app.get("/create-chapter",connectEnsureLogin.ensureLoggedIn(), async (req, res) 
 
   res.render("create-chapter", { courseId, messages: req.flash(),chapters,title:"Create Chapter",csrfToken:req.csrfToken() });
 });
-// POST route to create a new chapter
+// POST to create a new chapter
 app.post("/create-chapter",connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   try {
     const { title, description, courseId } = req.body;
