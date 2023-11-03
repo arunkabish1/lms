@@ -1,6 +1,6 @@
 const request = require("supertest");
 var cheerio = require("cheerio");
-const db = require("../models/index");
+const db = require("../models");
 const app = require("../app");
 
 let server, agent;
