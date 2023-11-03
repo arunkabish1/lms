@@ -380,6 +380,7 @@ app.get(
       const chapters = await Chapter.findAll();
       const pages = await Page.findAll();
       const userRole = req.user.role;
+      const userName = req.user.name;
       res.render("studenthome", {
         messages: req.flash(),
         courses,
@@ -388,6 +389,7 @@ app.get(
         pages,
         title: "Student Home",
         csrfToken: req.csrfToken(),
+        userName,
       });
     } catch (error) {
       console.error(error);
