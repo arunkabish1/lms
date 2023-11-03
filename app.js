@@ -31,7 +31,9 @@ app.use(session({
   secret: "my-super-secret-key-21212121212121212",
   cookie: {
     maxAge: 24 * 60 * 60 * 1000
-  }
+  },
+  resave: false,
+  saveUninitialized: false
 }));
 
 app.use(passport.initialize());
@@ -95,7 +97,7 @@ app.get("/adminhome", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     const chapters = await Chapter.findAll();
     const pages = await Page.findAll();
     const userRole = req.user.role;
-    res.render("adminhome", { userRole, courses, educator: req.user.name, chapters, pages, title: "Admin Home", csrfToken: req.csrfToken() });
+    res.render("adminhome", { messages: req.flash(), userRole, courses, educator: req.user.name, chapters, pages, title: "Admin Home", csrfToken: req.csrfToken() });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Error Occured" });
@@ -278,7 +280,7 @@ app.get("/adminpages",connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const pageContent = Page.content
   const chapterTitle = chapter.title
   const pageId = Page.id
-  res.render("adminpages", {pageId, pages,chapter, chapterId,chapterTitle, pageTitle, pageContent, title: "Admin Pages", csrfToken: req.csrfToken() });
+  res.render("adminpages", { messages: req.flash(),pageId, pages,chapter, chapterId,chapterTitle, pageTitle, pageContent, title: "Admin Pages", csrfToken: req.csrfToken() });
   }catch(error){
     console.error(error);
     return res.status(500).json({ error: "Error Occured" });
@@ -291,8 +293,8 @@ app.get("/studenthome", connectEnsureLogin.ensureLoggedIn(), async (req, res) =>
     const courses = await Course.findAll();
     const chapters = await Chapter.findAll();
     const pages = await Page.findAll();
-    const userRole = req.user.role; // Change "req.body.role" to "req.user.role"
-    res.render("studenthome", { courses, chapters, userRole, pages, title: "Student Home", csrfToken: req.csrfToken() });
+    const userRole = req.user.role;
+    res.render("studenthome", { messages: req.flash(), courses, chapters, userRole, pages, title: "Student Home", csrfToken: req.csrfToken() });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Error Occured" });
@@ -358,10 +360,10 @@ app.post("/users",async (req, res) => {
 
 // login and session
 app.get("/login", (req, res) => {
-  res.render("login", { title: "Login", messages: req.flash(),csrfToken: req.csrfToken() });
+  res.render("login", { messages: req.flash(), title: "Login",csrfToken: req.csrfToken() });
 })
 
-app.post("/login",passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
+app.post("/login",passport.authenticate("local", { failureRedirect: "/login",failureFlash: true }), (req, res) => {
   console.log(req.user);
     if (req.user.role === req.body.role) {
       if (req.body.role === "student") {
@@ -371,14 +373,17 @@ app.post("/login",passport.authenticate("local", { failureRedirect: "/login" }),
         req.flash("success", "Admin logged in successfully");
         res.redirect("/adminhome");
       }
+    
   }else{
+    console.log("Flash messages:", req.flash());
+    req.flash("error", "Check your credentials");
     res.redirect("/login");
   }
 })
 app.get("/session", (req, res) => {
   res.render("session", { title: "Login", messages: req.flash(),csrfToken: req.csrfToken() });
 })
-app.post("/session",passport.authenticate("local", { failureRedirect: "/login" }), (req, res) => {
+app.post("/session",passport.authenticate("local", { failureRedirect: "/login",failureFlash: true }), (req, res) => {
   console.log(req.user);
     if (req.user.role === req.body.role) {
       if (req.body.role === "student") {
@@ -389,8 +394,10 @@ app.post("/session",passport.authenticate("local", { failureRedirect: "/login" }
         res.redirect("/adminhome");
       }
   }else{
+    console.log("Flash messages:", req.flash());
+    req.flash("error", "Check your credentials");
     res.redirect("/login");
-
+    
   }
 })
 
@@ -437,6 +444,51 @@ app.get("/studentdisplay",connectEnsureLogin.ensureLoggedIn(), async (req, res) 
     return res.status(500).json({ error: "Error Occured" });
   }
 });
+// chamnge password
+app.get("/changepass",connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+  const userId = req.user.id;
+  res.render("changepass", {  userId,title: "Change Password", messages: req.flash(),csrfToken: req.csrfToken() });
+})
+app.post('/changepass', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const userId = req.body.userId;
+  const oldPassword = req.body.oldpassword;
+  const newPassword = req.body.newpassword;
+  console.log('User ID:', userId);
+   try {  
+    const user = await User.findByPk(userId);
+    if (!user) {
+    req.flash('error', 'User not found.');
+    return res.redirect('/changepass');
+    }
+    const passmatch = await bcrypt.compare(oldPassword, user.password);
+    if (!passmatch) {
+    req.flash('error', 'Incorrect old password.');
+    return res.redirect('/changepass');
+    }
+    const hashpassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashpassword;
+    console.log('User before save:', user);
+    await user.save();
+    console.log('User after save:', user);
+
+    req.flash('success', 'Password changed to New Password.');
+    console.log('Old Password:', oldPassword);
+    console.log('New Password:', newPassword);
+
+    if (user.role === "student") {
+      res.redirect('/studenthome');
+    }else{
+      res.redirect('/adminhome');
+    }
+  } catch (error) {
+    console.error(error);
+    req.flash('error', 'Server Error,Try again later :( ');
+    res.redirect('/changepass');
+  }
+});
+
+  
+  
 
 
 module.exports = app;
