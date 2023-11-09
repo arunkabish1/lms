@@ -4,9 +4,9 @@ const app = express();
 const bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
 const path = require("path");
-const { Course, Chapter, Page, User } = require("./models");
+const { Course, Chapter, Page, User,register } = require("./models");
 const flash = require("connect-flash");
-
+const jsonParser = express.json()
 app.set("views", path.join(__dirname, "views"));
 
 const passport = require("passport");
@@ -195,6 +195,7 @@ app.get("/pages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     const chapter = await Chapter.findByPk(chapterId);
     const pages = await Page.findAll({ where: { chapterId } });
     const userRole = req.user.role;
+    const userId = req.user.id;
 
     if (!chapter) {
       return res.status(404).json({ error: "Chapter not found" });
@@ -206,6 +207,7 @@ app.get("/pages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       chapterTitle: chapter.title,
       pages,
       title: "Pages",
+      userId,
       csrfToken: req.csrfToken(),
     });
   } catch (error) {
@@ -292,21 +294,26 @@ app.get("/display", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     const courses = await Course.findAll();
     const chapters = await Chapter.findAll();
     const pages = await Page.findAll();
-
-    const userRole = req.body.role;
+    const courseId = req.body.courseId;
+    const userRole = req.query.role;
+    const nonEnrolledCourses = allcourses.filter(course => {
+      return !enrolledCourses.some(enrolledCourse => enrolledCourse.courseId === course.id);
+    });
     res.render("display", {
-      courses,
+      courses: nonEnrolledCourses,
       chapters,
       pages,
       title: "Display",
       csrfToken: req.csrfToken(),
       userRole,
+      courseId 
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Error Occurred" });
   }
 });
+ 
 
 // view chapter when clicked
 app.get(
@@ -371,33 +378,54 @@ app.get(
 );
 
 // studenthome
-app.get(
-  "/studenthome",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (req, res) => {
-    try {
-      const courses = await Course.findAll();
-      const chapters = await Chapter.findAll();
-      const pages = await Page.findAll();
-      const userRole = req.user.role;
-      const userName = req.user.name;
-      res.render("studenthome", {
-        messages: req.flash(),
-        courses,
-        chapters,
-        userRole,
-        pages,
-        title: "Student Home",
-        csrfToken: req.csrfToken(),
-        userName,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "Error Occured" });
-    }
-  },
-);
+app.get("/studenthome", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    
+    const allcourses = await Course.findAll();
+    const chapters = await Chapter.findAll();
+    const pages = await Page.findAll();
+    const userRole = req.user.role;
+    const userName = req.user.name;
+    const userId = req.user.id;
+    const currentUser = req.user.id;
+    const enrolledCourses = await register.findAll({ where: { userId } });
 
+    const currentUserCourses = allcourses.filter(course => {
+      const matchingCourseIds = enrolledCourses.map(enrolledCourse => enrolledCourse.courseId);
+      // test when not workin
+      // console.log("Matching Course IDs:", matchingCourseIds);
+      // console.log("Current Course ID:", course.id);
+      return matchingCourseIds.includes(course.id);
+    });
+    const nonEnrolledCourses = allcourses.filter(course => {
+      return !enrolledCourses.some(enrolledCourse => enrolledCourse.courseId === course.id);
+    });
+    // test when not workingg
+    // console.log("Enrolled Courses:", enrolledCourses);
+    // console.log("Current User Courses:", currentUserCourses);
+
+
+    res.render("studenthome", {
+      messages: req.flash(),
+      currentUserCourses: currentUserCourses,
+      chapters,
+      courses: nonEnrolledCourses,
+      allcourses,
+      courseId: req.query.courseId,
+      enrolledCourses,
+      userRole,
+      userId,
+      pages,
+      title: "Student Home",
+      csrfToken: req.csrfToken(),
+      userName,
+      currentUser,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json
+  }
+});
 // signup page
 app.get("/signup", (req, res) => {
   res.render("signup", {
@@ -568,30 +596,60 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     const courseId = req.query.courseId;
+    const userId = req.user.id;
+
     try {
       const course = await Course.findByPk(courseId);
       if (!course) {
         return res.status(404).json({ error: "Course not found" });
       }
-      const chapters = await Chapter.findAll({ where: { courseId } });
-      const courseTitle = course.title;
-      const educator = course.educator;
-      const description = course.description;
-      res.render("studentdisplay", {
-        course,
-        courseTitle,
-        description,
-        educator,
-        chapters,
-        title: "Chapter View",
-        csrfToken: req.csrfToken(),
-      });
+
+      // Check if the user is enrolled in the course
+      const isEnrolled = await register.findOne({ where: { userId, courseId } });
+
+      if (isEnrolled) {
+        // User is enrolled, render chapter-view
+        const chapters = await Chapter.findAll({ where: { courseId } });
+        const courseTitle = course.title;
+        const educator = course.educator;
+        const description = course.description;
+        res.render("chapter-view", {
+          course,
+          courseTitle,
+          description,
+          educator,
+          chapters,
+          courseId: courseId,
+          title: "Chapter View",
+          csrfToken: req.csrfToken(),
+          messages: req.flash(),
+        });
+      } else {
+        // User is not enrolled, render course-view
+        const chapters = await Chapter.findAll({ where: { courseId } });
+        const courseTitle = course.title;
+        const educator = course.educator;
+        const description = course.description;
+        res.render("studentdisplay", {
+          course,
+          courseTitle,
+          description,
+          educator,
+          chapters,
+          courseId: courseId,
+          title: "Course View",
+          csrfToken: req.csrfToken(),
+          messages: req.flash(),
+          userRole: req.user.role,
+        })
+      }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Error Occured" });
+      return res.status(500).json({ error: "Error Occurred" });
     }
   },
 );
+
 // chamnge password
 app.get("/changepass", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   const userId = req.user.id;
@@ -643,5 +701,73 @@ app.post(
     }
   },
 );
+// after initial submission
+// enroll
+app.get('/enroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  res.render('enroll', {
+    title: 'Enroll',
+    messages: req.flash(),
+    csrfToken: req.csrfToken(),
+    userId: req.user.id,
+    courseId: req.query.courseId,
+  })
+})
+app.post('/enroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    console.log('Enroll route hit in internal');
+    console.log('Req body:', req.body);
+    const courseId  = req.params.id;
+    const userId = req.user.id;
+    await register.create({ userId, courseId });
+    req.flash('success', 'Enrolled in the course successfully');
+    res.redirect(`/chapter-view?courseId=${courseId}`);
+    }catch (error) {
+    console.error(error);
+    }
+  })
+
+  
+// ext enroll
+app.get('/extenroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  res.render('extenroll', {
+    title: 'Enroll',
+    messages: req.flash(),
+    csrfToken: req.csrfToken(),
+    userId: req.user.id,
+    courseId: req.query.courseId,
+  })
+})
+
+app.post('/extenroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    console.log('Enroll route in Outer');
+    console.log('Req body:', req.body);
+    const courseId  = req.params.id;
+    const userId = req.user.id;
+    await register.create({ userId, courseId });
+
+    res.redirect(`/chapter-view?courseId=${courseId}`);
+  } catch (error) {
+    console.error(error);
+
+  }
+})
+
+
+//register route for already register
+app.get('/check-enroll', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const courseId = req.query.courseId;
+    const registration = await register.findOne({ where: { userId, courseId } });
+    res.json({ enrolled: !!registration });
+  } catch (error) {
+    console.error('Error checking enrollment:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// report for student
+
 
 module.exports = app;

@@ -24,8 +24,25 @@
                     <p class="text-gray-600">Educator: <%= educator %> </p>
                     <p class="text-gray-600">description: <%= description %></p>
                     <p class="text-gray-600">Enroll to access full course</p>
-                    <button onclick="enrollButtonClicked()" class="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Enroll</button>
-                </div>
+                    <form method="post" action="/enroll/<%= courseId %>" class="mt-2">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" onclick="enrollClicked()" class="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Enroll</button>
+                        <br><hr><br>
+                        <!-- <div class="text-center " >
+                            <% if(messages && messages.success && messages.success.length > 0)  { %>
+                                <% for(var i=0; i<messages.success.length; i++) { %>
+                                    <p class="rounded-full bg-gray-600 text-center text-white"> <%= messages.success[i] %></p>
+                                <% } %>
+                              <% } %>
+                              
+                            <% if(messages && messages.error && messages.error.length > 0)  { %>
+                                <% for(var i=0; i<messages.error.length; i++) { %>
+                                    <p class="rounded-full bg-gray-600 text-center text-white"> <%= messages.error[i] %></p>
+                                <% } %>
+                              <% } %>
+                        </div> -->
+                    </form>
+            </div>
             </div>
             <div class="w-3/4">
                 <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Chapters Covered in <%= courseTitle %></h1>
@@ -35,7 +52,7 @@
                             <div class="relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
                                 <h2 class="mb-4 text-lg font-bold"><%= chapter.title %></h2>
                                 <div class="absolute bottom-6 right-7 mt-1 text-right">
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                                 <svg id="lock" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
                                  <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
                                     </svg>
                                 </div>
@@ -51,5 +68,26 @@
     <footer>
         <%- include("footer.ejs") %>
     </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+    const userRole = "<%= userRole %>";
+    const courses = document.querySelectorAll("[id^='enrollButton_']");
+    
+    courses.forEach(course => {
+        const courseId = course.id.split("_")[1];
+
+        if (userRole === 'educator') {
+            course.innerHTML = '&#10006;';
+            course.style.cursor = 'not-allowed';
+            course.disabled = true;
+        } else {
+            course.addEventListener("click", function() {
+                enrollCourse(courseId);
+            });
+        }
+    });
+});
+
+    </script>
 </body>
 </html>
