@@ -1,56 +1,75 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Chapters</title>
     <meta name="csrf-token" content="<%= csrfToken%>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
+
 <body class="bg-gray-100">
     <header>
         <%- include("header.ejs") %>
-        <div class="flex justify-end">
-            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-        </div>
     </header>
-    <div class="flex justify-end">
-        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+        <% if (role==='educator' ) { %>
+            <a href="/adminhome"
+                class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+                to Home</a>
+            <% } else { %>
+                <a href="/studenthome"
+                    class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+                    to Home</a>
+                <% } %>
     </div>
-    
+
     <div class="container mx-auto mt-8">
         <div class="flex">
             <div class="w-1/4">
-                <!-- Container on the left side for course details -->
                 <div class="mb-10 rounded-lg border border-gray-300 bg-white p-4">
-                    <h2 class="mb-2 text-lg font-bold"><%= courseTitle %></h2>
-                    <p class="text-gray-600">Educator: <%= educator %></p>
-                    <p class="text-gray-600">Description: <%= description %></p>
-                    <p class="text-gray-600 bold">You can access the full course</p>
+                    <h2 class="mb-2 text-lg font-bold">
+                        Course: <%= courseTitle %>
+                    </h2>
+                    <p class="text-gray-600  text-lg font-bold">Educator: <%= educator %>
+                    </p>
+                    <p class="text-gray-600  text-lg font-bold">Description: <%= description %>
+                    </p>
+                    <p class="text-gray-600  text-lg font-bold">You can access the full course</p>
                     <!-- <button onclick="enrollButtonClicked()" class="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Enroll</button> -->
                 </div>
+                <input type="hidden" value="<%= courseId %>">
             </div>
             <div class="w-3/4">
-                <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Chapters Covered in <%= courseTitle %></h1>
+                <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Chapters Covered in <%= courseTitle %>
+                </h1>
                 <div class="mx-11 gap-1">
-                    <% if (chapters.length > 0) { %>
+                    <% if (chapters.length> 0) { %>
                         <% chapters.forEach(function(chapter) { %>
-                            <a href="/adminpages?chapterId=<%= chapter.id %>">
-                            <div class="hover:bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
-                               
-                                <h2 class="mb-2 mx-25 text-lg font-bold"><%= chapter.title %></h2>
-                                <div class="absolute bottom-6 right-7 mt-1 text-right">
-                                </div>
+                            <a href="/pagelist?chapterId=<%= chapter.id %>&courseId=<%= courseId %>">
+
+                                <div
+                                    class="hover:bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
+
+                                    <h2 class="mb-2 mx-25 text-lg font-bold">
+                                        <%= chapter.title %>
+                                    </h2>
+                                    <div class="absolute bottom-6 right-7 mt-1 text-right">
+                                    </div>
                             </a>
-                            </div>
-                        <% }); %>
+                </div>
+                <% }); %>
                     <% } else { %>
                         <p class=" col-span-2 mx-100 text-lg text-gray-600">No Chapters available.</p>
-                    <% } %>
-                </div>
+                        <% } %>
             </div>
         </div>
+    </div>
     </div>
     <footer>
         <%- include("footer.ejs") %>
     </footer>
 </body>
+
 </html>

@@ -11,17 +11,14 @@
 <body class="bg-gray-100">
     <header>
         <%- include("header.ejs") %>
-        <div class="flex justify-end">
-          <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-      </div>
     </header>
-    <div class="flex justify-end">
-      <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-  </div>
+    <div class="flex justify-end gap-1">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+        <a href="/adminhome" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back to Home</a>
+    </div>
+    <h1 class="text-3xl mb-4 font-bold text-center">Created Courses</h1>
     <br><hr class="border-2 border-blue-400" >
     <br>  
-    <h1 class="text-3xl mb-4 font-bold text-center">My Courses</h1>
-    <br>
     <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
         <% admincourses.forEach(function(course) { %>
             <div class="bg-gray-200 p-4 rounded shadow-lg hover:shadow-lg transition duration-300 ease-in-out mb-4 cursor-pointer">
@@ -32,7 +29,7 @@
             </div>
         <% }); %>
     </div>
-    <a href="/adminhome" class="block mt-4 text-blue-500">Back to Home</a>
+    
     <footer>
         <%- include("footer.ejs") %>  
     </footer>

@@ -1,33 +1,44 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Chapters</title>
     <meta name="csrf-token" content="<%= csrfToken%>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
+
 <body class="bg-gray-100">
     <header>
         <%- include("header.ejs") %>
-        <div class="flex justify-end">
-            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-        </div>
+
     </header>
-    <div class="flex justify-end">
-        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+
+        <a href="/studenthome"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+            to Home</a>
     </div>
-    
+
     <div class="container mx-auto mt-8">
         <div class="flex">
             <div class="w-1/4">
                 <div class="mb-10 rounded-lg border border-gray-300 bg-white p-4">
-                    <h2 class="mb-2 text-lg font-bold"><%= courseTitle %></h2>
-                    <p class="text-gray-600">Educator: <%= educator %> </p>
-                    <p class="text-gray-600">description: <%= description %></p>
-                    <p class="text-gray-600">Enroll to access full course</p>
+                    <h2 class="mb-2 text-lg font-bold">
+                        <%= courseTitle %>
+                    </h2>
+                    <p class="text-gray-600 font-bold">Educator: <%= educator %>
+                    </p>
+                    <p class="text-gray-600 font-bold">description: <%= description %>
+                    </p>
+                    <p class="text-gray-600 font-bold">Enroll Now To Start</p>
                     <form method="post" action="/enroll/<%= courseId %>" class="mt-2">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="submit" onclick="enrollClicked()" class="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Enroll</button>
-                        <br><hr><br>
+                        <button type="submit" onclick="enrollClicked()"
+                            class="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">Enroll</button>
+                        <br>
+                        <hr><br>
                         <!-- <div class="text-center " >
                             <% if(messages && messages.success && messages.success.length > 0)  { %>
                                 <% for(var i=0; i<messages.success.length; i++) { %>
@@ -42,25 +53,30 @@
                               <% } %>
                         </div> -->
                     </form>
-            </div>
+                </div>
             </div>
             <div class="w-3/4">
-                <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Chapters Covered in <%= courseTitle %></h1>
+                <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Chapters Covered in <%= courseTitle %>
+                </h1>
                 <div class="mx-11 gap-1">
-                    <% if (chapters.length > 0) { %>
+                    <% if (chapters.length> 0) { %>
                         <% chapters.forEach(function(chapter) { %>
-                            <div class="relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
-                                <h2 class="mb-4 text-lg font-bold"><%= chapter.title %></h2>
+                            <div class="relative mb-4 rounded-lg border border-gray-300 bg-white p-4 hover:shadow-lg">
+                                <h2 class="mb-4 text-lg font-bold">
+                                    <%= chapter.title %> (Enroll To Access)
+                                </h2>
                                 <div class="absolute bottom-6 right-7 mt-1 text-right">
-                                 <svg id="lock" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
-                                 <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                                    <svg id="lock" xmlns="http://www.w3.org/2000/svg" width="30" height="30"
+                                        fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                                        <path
+                                            d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
                                     </svg>
                                 </div>
                             </div>
-                        <% }); %>
-                    <% } else { %>
-                        <p class=" col-span-2 mx-96 text-lg text-gray-600">No Chapters available.</p>
-                    <% } %>
+                            <% }); %>
+                                <% } else { %>
+                                    <p class=" col-span-2 mx-96 text-lg text-gray-600">No Chapters available.</p>
+                                    <% } %>
                 </div>
             </div>
         </div>
@@ -69,25 +85,26 @@
         <%- include("footer.ejs") %>
     </footer>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-    const userRole = "<%= userRole %>";
-    const courses = document.querySelectorAll("[id^='enrollButton_']");
-    
-    courses.forEach(course => {
-        const courseId = course.id.split("_")[1];
+        document.addEventListener("DOMContentLoaded", function () {
+            const userRole = "<%= userRole %>";
+            const courses = document.querySelectorAll("[id^='enrollButton_']");
 
-        if (userRole === 'educator') {
-            course.innerHTML = '&#10006;';
-            course.style.cursor = 'not-allowed';
-            course.disabled = true;
-        } else {
-            course.addEventListener("click", function() {
-                enrollCourse(courseId);
+            courses.forEach(course => {
+                const courseId = course.id.split("_")[1];
+
+                if (userRole === 'educator') {
+                    course.innerHTML = '&#10006;';
+                    course.style.cursor = 'not-allowed';
+                    course.disabled = true;
+                } else {
+                    course.addEventListener("click", function () {
+                        enrollCourse(courseId);
+                    });
+                }
             });
-        }
-    });
-});
+        });
 
     </script>
 </body>
+
 </html>

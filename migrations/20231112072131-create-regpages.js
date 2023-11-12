@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('reports', {
+    await queryInterface.createTable('Regpages', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -21,8 +21,8 @@ module.exports = {
       pageId: {
         type: Sequelize.INTEGER
       },
-      iscompeted: {
-        type: Sequelize.STRING
+      iscomplete: {
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,
@@ -35,6 +35,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('reports');
+    await queryInterface.dropTable('Regpages');
   }
 };

@@ -1,12 +1,21 @@
+// eslint-disable-next-line no-undef
 const express = require("express");
 var csrf = require("tiny-csrf");
 const app = express();
 const bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
 const path = require("path");
-const { Course, Chapter, Page, User,register } = require("./models");
+const {
+  Course,
+  Chapter,
+  Page,
+  User,
+  Register,
+  Regpages,
+  RegChapter,
+} = require("./models");
 const flash = require("connect-flash");
-const jsonParser = express.json()
+const jsonParser = express.json();
 app.set("views", path.join(__dirname, "views"));
 
 const passport = require("passport");
@@ -14,6 +23,7 @@ var connectEnsureLogin = require("connect-ensure-login");
 var session = require("express-session");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
+const { ESLint } = require("eslint");
 
 const saltRounds = 10;
 app.use(flash());
@@ -25,6 +35,10 @@ app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
 app.use(express.static(path.join(__dirname, "/public")));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+app.use((req, res, next) => {
+  res.set("Cache-Control", "max-age=0, no-cache, must-revalidate");
+  next();
+});
 
 app.use(
   session({
@@ -34,7 +48,7 @@ app.use(
     },
     resave: false,
     saveUninitialized: false,
-  }),
+  })
 );
 
 app.use(passport.initialize());
@@ -58,11 +72,11 @@ passport.use(
         })
         .catch(() => {
           return done(null, false, {
-            message: "This email is not registered",
+            message: "This email is not Registered",
           });
         });
-    },
-  ),
+    }
+  )
 );
 
 passport.serializeUser((user, done) => {
@@ -86,6 +100,7 @@ app.get("/", (req, res) => {
 
 app.get("/index", (req, res) => {
   res.render("index", { title: "Home", csrfToken: req.csrfToken() });
+  return;
 });
 //adminhome
 app.get("/adminhome", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
@@ -137,7 +152,7 @@ app.post(
       console.error(error);
       return res.status(500).json({ error: "Error Occured" });
     }
-  },
+  }
 );
 
 // Create a new chapter
@@ -159,7 +174,7 @@ app.get(
       title: "Create Chapter",
       csrfToken: req.csrfToken(),
     });
-  },
+  }
 );
 // POST to create a new chapter
 app.post(
@@ -177,6 +192,7 @@ app.post(
         title: title,
         description: description,
         courseId: courseId,
+        isCompleted: false,
       });
       req.flash("success", "Chapter created successfully");
       res.redirect(`/create-chapter?courseId=${courseId}`);
@@ -184,18 +200,21 @@ app.post(
       console.error(error);
       return res.status(500).json({ error: "Error Occured" });
     }
-  },
+  }
 );
 
 // Display pages
 app.get("/pages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   try {
     const chapterId = req.query.chapterId;
+    const courseId = req.query.courseId;
 
     const chapter = await Chapter.findByPk(chapterId);
     const pages = await Page.findAll({ where: { chapterId } });
     const userRole = req.user.role;
     const userId = req.user.id;
+    console.log("courseId:", courseId);
+
 
     if (!chapter) {
       return res.status(404).json({ error: "Chapter not found" });
@@ -204,6 +223,7 @@ app.get("/pages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     res.render("pages", {
       chapterId,
       userRole,
+      courseId,
       chapterTitle: chapter.title,
       pages,
       title: "Pages",
@@ -242,6 +262,9 @@ app.get(
       const chapters = await Chapter.findAll();
       const chapter = await Chapter.findByPk(chapterId);
       const pages = await Page.findAll({ where: { chapterId } });
+      const courseId = req.query.courseId;
+      console.log(courseId);
+      console.log(chapterId);
 
       if (!chapter) {
         return res.status(404).json({ error: "Chapter not found" });
@@ -249,6 +272,7 @@ app.get(
 
       res.render("create-page", {
         chapters,
+        courseId,
         messages: req.flash(),
         chapterId,
         chapterTitle: chapter.title,
@@ -260,7 +284,7 @@ app.get(
       console.error(error);
       return res.status(500).json({ error: "Error Occured" });
     }
-  },
+  }
 );
 
 app.post(
@@ -268,24 +292,31 @@ app.post(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     try {
-      const { title, content, chapterId } = req.body;
 
+      const { title, content, chapterId, courseId } = req.body;
+      if (courseId == null) {
+        courseId = req.query.courseId;
+      }
       if (!chapterId) {
         return res.status(400).json({ error: "Chapter ID is missing" });
+      }
+      if (!courseId) {
+        return res.status(400).json({ error: "Course ID is missing" });
       }
 
       await Page.create({
         title: title,
         content: content,
         chapterId: chapterId,
+        courseId: courseId,
       });
       req.flash("success", "You created the Page successfully");
-      res.redirect(`/pages?chapterId=${chapterId}`);
+      res.redirect(`/pages?chapterId=${chapterId}&courseId=${courseId}`);
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Error Occured" });
     }
-  },
+  }
 );
 
 // Display courses,chapters,and pages
@@ -296,24 +327,21 @@ app.get("/display", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     const pages = await Page.findAll();
     const courseId = req.body.courseId;
     const userRole = req.query.role;
-    const nonEnrolledCourses = allcourses.filter(course => {
-      return !enrolledCourses.some(enrolledCourse => enrolledCourse.courseId === course.id);
-    });
     res.render("display", {
       courses: nonEnrolledCourses,
       chapters,
+      courses,
       pages,
       title: "Display",
       csrfToken: req.csrfToken(),
       userRole,
-      courseId 
+      courseId,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Error Occurred" });
   }
 });
- 
 
 // view chapter when clicked
 app.get(
@@ -321,6 +349,7 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     const courseId = req.query.courseId;
+    const role = req.user.role;
     try {
       const course = await Course.findByPk(courseId);
       if (!course) {
@@ -329,12 +358,15 @@ app.get(
       const chapters = await Chapter.findAll({ where: { courseId } });
       const courseTitle = course.title;
       const educator = course.educator;
+
       const description = course.description;
       res.render("chapter-view", {
         course,
         courseTitle,
+        courseId,
         description,
         educator,
+        role,
         chapters,
         title: "Chapter View",
         csrfToken: req.csrfToken(),
@@ -343,13 +375,17 @@ app.get(
       console.error(error);
       return res.status(500).json({ error: "Error Occured" });
     }
-  },
+  }
 );
 app.get(
   "/adminpages",
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
     const chapterId = req.query.chapterId;
+    const courseId = req.query.courseId;
+    const userId = req.user.id;
+    const role = req.user.role;
+
     try {
       const chapter = await Chapter.findByPk(chapterId);
 
@@ -357,12 +393,19 @@ app.get(
       const pageTitle = Page.title;
       const pageContent = Page.content;
       const chapterTitle = chapter.title;
-      const pageId = Page.id;
+      const pageId = pages.length > 0 ? pages[0] : null;
+      console.log(pageId);
+      const page = pageId ? await Page.findByPk(pageId.id) : null;
       res.render("adminpages", {
         messages: req.flash(),
-        pageId,
+
         pages,
+        userId,
+        pageId: pageId ? pageId.id : null,
+        courseId,
         chapter,
+        role,
+        page,
         chapterId,
         chapterTitle,
         pageTitle,
@@ -374,58 +417,61 @@ app.get(
       console.error(error);
       return res.status(500).json({ error: "Error Occured" });
     }
-  },
+  }
 );
 
 // studenthome
-app.get("/studenthome", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  try {
-    
-    const allcourses = await Course.findAll();
-    const chapters = await Chapter.findAll();
-    const pages = await Page.findAll();
-    const userRole = req.user.role;
-    const userName = req.user.name;
-    const userId = req.user.id;
-    const currentUser = req.user.id;
-    const enrolledCourses = await register.findAll({ where: { userId } });
+app.get(
+  "/studenthome",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    try {
+      const allcourses = await Course.findAll();
+      const chapters = await Chapter.findAll();
+      const pages = await Page.findAll();
+      const userRole = req.user.role;
+      const userName = req.user.name;
+      const userId = req.user.id;
+      const currentUser = req.user.id;
+      const enrolledCourses = await Register.findAll({ where: { userId } });
 
-    const currentUserCourses = allcourses.filter(course => {
-      const matchingCourseIds = enrolledCourses.map(enrolledCourse => enrolledCourse.courseId);
-      // test when not workin
-      // console.log("Matching Course IDs:", matchingCourseIds);
-      // console.log("Current Course ID:", course.id);
-      return matchingCourseIds.includes(course.id);
-    });
-    const nonEnrolledCourses = allcourses.filter(course => {
-      return !enrolledCourses.some(enrolledCourse => enrolledCourse.courseId === course.id);
-    });
-    // test when not workingg
-    // console.log("Enrolled Courses:", enrolledCourses);
-    // console.log("Current User Courses:", currentUserCourses);
+      const currentUserCourses = allcourses.filter((course) => {
+        const matchingCourseIds = enrolledCourses.map(
+          (enrolledCourse) => enrolledCourse.courseId
+        );
+        return matchingCourseIds.includes(course.id);
+      });
 
+      const nonEnrolledCourses = allcourses.filter((course) => {
+        return !enrolledCourses.some(
+          (enrolledCourse) => enrolledCourse.courseId === course.id
+        );
+      });
 
-    res.render("studenthome", {
-      messages: req.flash(),
-      currentUserCourses: currentUserCourses,
-      chapters,
-      courses: nonEnrolledCourses,
-      allcourses,
-      courseId: req.query.courseId,
-      enrolledCourses,
-      userRole,
-      userId,
-      pages,
-      title: "Student Home",
-      csrfToken: req.csrfToken(),
-      userName,
-      currentUser,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json
+      res.render("studenthome", {
+        messages: req.flash(),
+        currentUserCourses: currentUserCourses,
+        chapters,
+        courses: nonEnrolledCourses,
+        allcourses,
+        courseId: req.query.courseId,
+        enrolledCourses,
+        availableCourses: nonEnrolledCourses,
+        userRole,
+        userId,
+        pages,
+        title: "Student Home",
+        csrfToken: req.csrfToken(),
+        userName,
+        currentUser,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json;
+    }
   }
-});
+);
+
 // signup page
 app.get("/signup", (req, res) => {
   res.render("signup", {
@@ -456,7 +502,7 @@ app.post("/users", async (req, res) => {
   if (req.body.password.length <= 8) {
     req.flash(
       "error",
-      "password is not strong as it is less than 8 characters",
+      "password is not strong as it is less than 8 characters"
     );
     return res.redirect("/signup");
   }
@@ -522,7 +568,7 @@ app.post(
       req.flash("error", "Check your credentials");
       res.redirect("/login");
     }
-  },
+  }
 );
 app.get("/session", (req, res) => {
   res.render("session", {
@@ -552,7 +598,7 @@ app.post(
       req.flash("error", "Check your credentials");
       res.redirect("/login");
     }
-  },
+  }
 );
 
 // signout page
@@ -588,7 +634,7 @@ app.get(
       console.error(error);
       return res.status(500).json({ error: "Error Occurred" });
     }
-  },
+  }
 );
 
 app.get(
@@ -604,11 +650,11 @@ app.get(
         return res.status(404).json({ error: "Course not found" });
       }
 
-      // Check if the user is enrolled in the course
-      const isEnrolled = await register.findOne({ where: { userId, courseId } });
+      const isEnrolled = await Register.findOne({
+        where: { userId, courseId },
+      });
 
       if (isEnrolled) {
-        // User is enrolled, render chapter-view
         const chapters = await Chapter.findAll({ where: { courseId } });
         const courseTitle = course.title;
         const educator = course.educator;
@@ -625,7 +671,6 @@ app.get(
           messages: req.flash(),
         });
       } else {
-        // User is not enrolled, render course-view
         const chapters = await Chapter.findAll({ where: { courseId } });
         const courseTitle = course.title;
         const educator = course.educator;
@@ -641,20 +686,22 @@ app.get(
           csrfToken: req.csrfToken(),
           messages: req.flash(),
           userRole: req.user.role,
-        })
+        });
       }
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Error Occurred" });
     }
-  },
+  }
 );
 
 // chamnge password
 app.get("/changepass", connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   const userId = req.user.id;
+  const role = req.user.role;
   res.render("changepass", {
     userId,
+    role,
     title: "Change Password",
     messages: req.flash(),
     csrfToken: req.csrfToken(),
@@ -699,75 +746,437 @@ app.post(
       req.flash("error", "Server Error,Try again later :( ");
       res.redirect("/changepass");
     }
-  },
+  }
 );
 // after initial submission
 // enroll
-app.get('/enroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  res.render('enroll', {
-    title: 'Enroll',
-    messages: req.flash(),
-    csrfToken: req.csrfToken(),
-    userId: req.user.id,
-    courseId: req.query.courseId,
-  })
-})
-app.post('/enroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  try {
-    console.log('Enroll route hit in internal');
-    console.log('Req body:', req.body);
-    const courseId  = req.params.id;
-    const userId = req.user.id;
-    await register.create({ userId, courseId });
-    req.flash('success', 'Enrolled in the course successfully');
-    res.redirect(`/chapter-view?courseId=${courseId}`);
-    }catch (error) {
-    console.error(error);
-    }
-  })
-
-  
-// ext enroll
-app.get('/extenroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  res.render('extenroll', {
-    title: 'Enroll',
-    messages: req.flash(),
-    csrfToken: req.csrfToken(),
-    userId: req.user.id,
-    courseId: req.query.courseId,
-  })
-})
-
-app.post('/extenroll/:id', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  try {
-    console.log('Enroll route in Outer');
-    console.log('Req body:', req.body);
-    const courseId  = req.params.id;
-    const userId = req.user.id;
-    await register.create({ userId, courseId });
-
-    res.redirect(`/chapter-view?courseId=${courseId}`);
-  } catch (error) {
-    console.error(error);
-
+app.get(
+  "/enroll/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    res.render("enroll", {
+      title: "Enroll",
+      messages: req.flash(),
+      csrfToken: req.csrfToken(),
+      userId: req.user.id,
+      courseId: req.query.courseId,
+    });
   }
-})
+);
+app.post(
+  "/enroll/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    try {
+      console.log("Enroll route in Outer");
+      console.log("Req body:", req.user.id);
+      console.log("Req body:", req.params.id);
 
+      const courseId = req.params.id;
+      const userId = req.user.id;
 
-//register route for already register
-app.get('/check-enroll', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+      if (!userId || !courseId) {
+        return res.status(400).send("Invalid userId or courseId");
+      }
+
+      const existingRegistration = await Register.findOne({
+        where: { userId, courseId },
+      });
+
+      if (existingRegistration) {
+        return res.redirect(`/chapter-view?courseId=${courseId}`);
+      }
+
+      await Register.create({ userId, courseId });
+
+      return res.redirect(`/chapter-view?courseId=${courseId}`);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send("Server Error");
+    }
+  }
+);
+
+app.post(
+  "/extenroll/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    try {
+      console.log("Enroll route in Outer");
+      console.log("Req body:", req.user.id);
+      console.log("Req body:", req.params.id);
+
+      const courseId = req.params.id;
+      const userId = req.user.id;
+
+      if (!userId || !courseId) {
+        return res.status(400).send("Invalid userId or courseId");
+      }
+
+      const existingRegistration = await Register.findOne({
+        where: { userId, courseId },
+      });
+
+      if (existingRegistration) {
+        return res.redirect(`/chapter-view?courseId=${courseId}`);
+      }
+
+      await Register.create({ userId, courseId });
+
+      return res.redirect(`/chapter-view?courseId=${courseId}`);
+    } catch (error) {
+      console.error(error);
+      // Handle the error and send an appropriate response
+      return res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+// ext enroll
+app.get(
+  "/extenroll/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    res.render("extenroll", {
+      title: "Enroll",
+      messages: req.flash(),
+      csrfToken: req.csrfToken(),
+      userId: req.user.id,
+      courseId: req.query.courseId,
+    });
+  }
+);
+
+app.post(
+  "/extenroll/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    try {
+      console.log("Enroll route in Outer");
+      console.log("Req body:", req.body.userId);
+      console.log("Req body:", req.body.courseId);
+      const courseId = req.params.id;
+      const userId = req.user.id;
+      const existingRegistration = await Register.findOne({ userId, courseId });
+
+      if (existingRegistration) {
+        res.redirect(`/chapter-view?courseId=${courseId}`);
+      }
+      await Register.create({ userId, courseId });
+
+      res.redirect(`/chapter-view?courseId=${courseId}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
+
+//Register route for already Register
+app.get(
+  "/check-enroll",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const courseId = req.query.courseId;
+      const registration = await Register.findOne({
+        where: { userId, courseId },
+      });
+      res.json({ enrolled: !!registration });
+    } catch (error) {
+      console.error("Error checking enrollment:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
+// pagelist
+app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const chapterId = req.query.chapterId;
+  const pageId = req.query.pageId;
+  const userId = req.user.id;
+  const role = req.user.role;
+  const courseId = req.query.courseId;
+
   try {
-    const userId = req.user.id;
-    const courseId = req.query.courseId;
-    const registration = await register.findOne({ where: { userId, courseId } });
-    res.json({ enrolled: !!registration });
+    const chapter = await Chapter.findByPk(chapterId);
+
+    const pages = await Page.findAll({ where: { chapterId } });
+    const pageTitle = Page.title;
+    const pageContent = Page.content;
+    const chapterTitle = chapter.title;
+    const pageId = Page.id;
+    res.render("pagelist", {
+      messages: req.flash(),
+      pageId,
+      pages,
+      userId,
+      chapter,
+      role,
+      courseId,
+      chapterId,
+      chapterTitle,
+      pageTitle,
+      pageContent,
+      title: "Pagelist",
+      csrfToken: req.csrfToken(),
+    });
   } catch (error) {
-    console.error('Error checking enrollment:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error(error);
+    return res.status(500).json({ error: "Error Occured" });
+  }
+});
+// markascompleted by chapters
+// app.post("/markascompleted",  connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+//   try {
+//     console.log("Received body:", req.body);
+//     const { chapterId, courseId, userId } = req.body;
+//     console.log("Received values:", userId, courseId, chapterId);
+
+//     const existingEntry = await RegChapter.findOne({
+//       where: {
+//         chapterId: chapterId,
+//         courseId: courseId,
+//         userId: userId,
+//       },
+//     });
+
+//     if (existingEntry) {
+//       console.log("Chapter already marked as completed");
+//       res.redirect(`/chapter-view?courseId=${courseId}`);
+//       return;
+//     } else {
+//       await RegChapter.create({
+//         userId: userId,
+//         courseId: courseId,
+//         chapterId: chapterId,
+//         iscomplete: true,
+//       });
+//       console.log("New row created and marked as completed successfully");
+//     }
+
+//     res.redirect(`/chapter-view?courseId=${courseId}`);
+//   } catch (error) {
+//     console.error("Error:", error);
+//     // Send an error response
+//     res.status(500).send("Failed to mark chapter as completed");
+//   }
+// });
+// calculation
+app.get("/displayc", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    const allcourses = await Course.findAll();
+    const chapters = await Chapter.findAll();
+    const pages = await Page.findAll();
+    const userRole = req.user.role;
+    const userName = req.user.name;
+    const userId = req.user.id;
+    const currentUser = req.user.id;
+    const enrolledCourses = await Register.findAll({ where: { userId } });
+
+    const currentUserCourses = allcourses.filter((course) => {
+      const matchingCourseIds = enrolledCourses.map(
+        (enrolledCourse) => enrolledCourse.courseId
+      );
+      // test when not workin
+      // console.log("Matching Course IDs:", matchingCourseIds);
+      // console.log("Current Course ID:", course.id);
+      return matchingCourseIds.includes(course.id);
+    });
+    const nonEnrolledCourses = allcourses.filter((course) => {
+      return !enrolledCourses.some(
+        (enrolledCourse) => enrolledCourse.courseId === course.id
+      );
+    });
+    // test when not workingg
+    // console.log("Enrolled Courses:", enrolledCourses);
+    // console.log("Current User Courses:", currentUserCourses);
+
+    res.render("displayc", {
+      messages: req.flash(),
+      currentUserCourses: currentUserCourses,
+      chapters,
+      courses: nonEnrolledCourses,
+      allcourses,
+      courseId: req.query.courseId,
+      enrolledCourses,
+      userRole,
+      userId,
+      pages,
+      title: "",
+      csrfToken: req.csrfToken(),
+      userName,
+      currentUser,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json;
+  }
+});
+// commented it for page wise progress
+// app.get('/progress/:id',  connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+//     try {
+//       const courseId = req.params.id;
+//       console.log('Course ID:', courseId);
+//       const chapters = await Chapter.findAll({
+//           where: {
+//               courseId: courseId,
+//           },
+//       });
+
+//       const chapterCount = chapters.length;
+//       const completedChapters = await RegChapter.count({
+//           where: {
+//               courseId: courseId,
+//               iscomplete: true,
+//           },
+//       });
+//       const totalpercentage = (completedChapters / chapterCount) * 100;
+
+//       const completedChapterIds = (await RegChapter.findAll({
+//         attributes: ['chapterId'],
+//         where: {
+//             courseId: courseId,
+//             iscomplete: true,
+//         },
+//     })).map(chapter => chapter.chapterId);
+
+//     res.render('progress', {
+//         courseId: courseId,
+//         chapterCount: chapterCount,
+//         completedChapters: completedChapters,
+//         totalpercentage: totalpercentage,
+//         chapters: chapters,
+//         completedChapterIds: completedChapterIds,
+//     });
+//   } catch (error) {
+//       console.error('Error:', error);
+//       res.status(500).send('Failed');
+//   }
+// });
+
+
+// Define the route to show the progress page
+app.get('/progress/:courseId', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const userId = req.user.id;
+    const course = await Course.findOne({
+      where: {
+        id: courseId,
+      },
+    });
+    const coursename = course.title;
+    const allPages = await Page.findAll({
+      where: {
+        courseId: courseId,
+      },
+    });
+
+    const completedPages = await Regpages.findAll({
+      where: {
+        userId: userId,
+        courseId: courseId,
+        iscomplete: true,
+      },
+    });
+
+    const pagesCount = allPages.length;
+    const completedPagesCount = completedPages.length;
+
+    const completionPercentage = (completedPagesCount / pagesCount) * 100;
+
+    res.render('progress', {
+      title: 'Course Progress',
+      courseId: courseId,
+      coursename,
+      pagesCount: pagesCount,
+      completedPagesCount: completedPagesCount,
+      completionPercentage: completionPercentage,
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Failed to retrieve course progress');
   }
 });
 
-// report for student
 
+// teacherside
+
+app.get('/report', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    const educatorCourses = await Course.findAll({ where: { userId: req.user.id } });
+
+    const coursesWithEnrollmentCount = await Promise.all(
+      educatorCourses.map(async (course) => {
+        const enrollmentCount = await Register.count({ where: { courseId: course.id } });
+        return { course, enrollmentCount };
+      })
+    );
+
+    const sortedCourses = coursesWithEnrollmentCount.sort((a, b) => b.enrollmentCount - a.enrollmentCount);
+
+    const maxEnrollmentCount = sortedCourses[0].enrollmentCount;
+    const coursesWithPopularity = sortedCourses.map((item) => ({
+      ...item,
+      popularityScore: (item.enrollmentCount / maxEnrollmentCount) * 100,
+    }));
+
+    res.render('report', {
+      educatorCourses: coursesWithPopularity,
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// mark chapter as completed by pages
+
+app.post('/markascompleted', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+
+    const { courseId, chapterId, pageId } = req.body;
+    const userId = req.user.id;
+    console.log('Received body:', req.body);
+    console.log('Received values:', userId, courseId, pageId);
+    if (!pageId) {
+      return res.status(400).json({ error: 'Invalid pageId' });
+    }
+
+    const existingEntry = await Regpages.findOne({
+      where: {
+        pageId: pageId,
+        courseId: courseId,
+        userId: userId,
+      },
+    });
+
+    if (existingEntry) {
+      console.log('Page already marked as completed');
+      res.redirect(`/pagelist?chapterId=${chapterId}&courseId=${courseId}`);
+      return;
+    } else {
+      await Regpages.create({
+        userId: userId,
+        courseId: courseId,
+        pageId: pageId,
+        chapterId: chapterId,
+        iscomplete: true,
+      });
+      console.log('New row created and marked as completed successfully');
+    }
+
+    res.redirect(`/pagelist?chapterId=${chapterId}&courseId=${courseId}`);
+  } catch (error) {
+    console.error('Error:', error);
+    // Send an error response
+    res.status(500).send('Failed to mark page as completed');
+  }
+});
+
+
+// !------------------------END-----------------------------------!
+// all are formated by prettier
 
 module.exports = app;

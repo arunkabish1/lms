@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,19 +11,23 @@
         <%= title %>
     </title>
 </head>
+
 <body>
     <header>
         <%- include("header.ejs") %>
     </header>
     <div class="grid-cols-3 mt-10">
         <div class="col-start-2 col-span-2">
-            <p class="py-2  text-center text-3xl text-green-600 mb-8 font-semibold mt-4 ">Welcome to the Learning Management System</p>
+            <p class="py-2  text-center text-3xl text-green-600 mb-8 font-semibold mt-4 ">Welcome to the Learning
+                Management System</p>
             <p class="py-2 text-center">New to LMS? <a href="/signup" class="text-green-600">Sign-up now</a></p>
-            <p class="py-2 text-center">Already have an account in LMS? <a href="/login" class="text-green-600">Sign-in</a></p>
+            <p class="py-2 text-center">Already have an account in LMS? <a href="/login"
+                    class="text-green-600">Sign-in</a></p>
         </div>
     </div>
     <footer>
         <%- include ('footer.ejs') %>
     </footer>
 </body>
+
 </html>

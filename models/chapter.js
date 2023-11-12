@@ -1,5 +1,7 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const {
+  Model
+} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Chapter extends Model {
     /**
@@ -8,7 +10,6 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
       Chapter.belongsTo(models.Course, { foreignKey: "courseId" });
     }
     static addchapter(title, description, courseId) {
@@ -25,19 +26,16 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.INTEGER,
           allowNull: false,
         },
-      });
+      });  // define association here
     }
   }
-  Chapter.init(
-    {
-      title: DataTypes.STRING,
-      description: DataTypes.STRING,
-      courseId: DataTypes.INTEGER,
-    },
-    {
-      sequelize,
-      modelName: "Chapter",
-    },
-  );
+  Chapter.init({
+    title: DataTypes.STRING,
+    description: DataTypes.STRING,
+    courseId: DataTypes.INTEGER
+  }, {
+    sequelize,
+    modelName: 'Chapter',
+  });
   return Chapter;
 };

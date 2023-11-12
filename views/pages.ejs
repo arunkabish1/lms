@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title><%= title %></title>
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <title>
+        <%= title %>
+    </title>
+    <meta name="csrf-token" content="<%= csrfToken %>" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
 </head>
-<body class="bg-gradient-to-r from-white-300 to-peach-300">
-    <header><%- include("header.ejs") %>
-      <div class="flex justify-end">
-        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+
+<body class="from-white-300 to-peach-300 bg-gradient-to-r">
+    <header><%- include("header.ejs") %></header>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="mt-25 mb-4 mt-24 mt-4 rounded bg-red-500 px-4 py-2 text-lg font-bold font-semibold text-white hover:bg-red-700">signout</a>
+        <a href="/adminhome"
+            class="mt-25 mb-4 mt-24 mt-4 rounded bg-red-500 px-4 py-2 text-lg font-bold font-semibold text-white hover:bg-red-700">Back
+            to Home</a>
     </div>
-    </header>
-    <div class="flex justify-end">
-      <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-  </div>
     <div class="container mx-auto mt-24">
         <input type="hidden" name="chapterId" value="<%= chapterId %>" />
         <div class="md:10 mx-4 my-8 rounded-lg bg-slate-200 p-4 shadow-lg">
-            <h1 class="mb-8 text-center text-4xl text-indigo-700">Chapter: <%= chapterTitle %></h1>
+            <h1 class="mb-8 text-center text-4xl text-indigo-700">Pages in Chapter: <%= chapterTitle %>
+            </h1>
 
             <div class="grid grid-cols-1 gap-4">
-                <% if (pages.length > 0) { %> 
-                    <% pages.forEach(function(page) { %>
+                <% if (pages.length> 0) { %> <% pages.forEach(function(page) { %>
                         <div class="rounded-lg border bg-gray-100 p-4">
-                            <h2 class="mb-2 text-2xl font-semibold text-indigo-800"><%= page.title %></h2>
-                            <p class="text-gray-600"><%= page.content %></p>
+                            <h2 class="mb-2 text-2xl font-semibold text-indigo-800">
+                                <%= page.title %>
+                            </h2>
+                            <p class="text-gray-600">
+                                <%= page.content %>
+                            </p>
                         </div>
-                    <% }); %> 
-                <% } else { %>
-                    <p class="text-center text-gray-600">OOPS! No pages in this chapter.</p>
-                <% } %>
+                        <% }); %>
+                            <% } else { %>
+                                <p class="text-center text-gray-600">OOPS! No pages in this chapter.</p>
+                                <% } %>
             </div>
 
             <div class="mt-6 text-center">
-                <a href="/create-page?chapterId=<%= chapterId %>" class="inline-block rounded-full bg-green-400 px-4 py-2 font-semibold text-white shadow-md hover:bg-green-500">Create New Page</a>
-                <% if (userRole === 'student') { %>
-                    <a href="/studenthome" class="inline-block mt-4 text-xl font-semibold bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Main Menu</a>
-                <% } else { %>
-                    <a href="/adminhome" class="inline-block mt-4 text-xl font-semibold bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Main Menu</a>
-                <% } %>
+                <input type="hidden" name="courseId" value="<%= courseId %>" />
+                <a href="/create-page?chapterId=<%= chapterId %>&courseId=<%= courseId %>"
+                    class="inline-block rounded-full bg-green-400 px-4 py-2 font-semibold text-white shadow-md hover:bg-green-500">Create
+                    New Page</a>
+                <a href="/adminhome"
+                    class="inline-block rounded-full bg-red-400 px-4 py-2 font-semibold text-white shadow-md hover:bg-green-500">Main
+                    Menu</a>
             </div>
         </div>
     </div>
 </body>
-<footer>
-    <%- include("footer.ejs") %>
-</footer>
+<footer><%- include("footer.ejs") %></footer>
+
 </html>

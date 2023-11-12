@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         <%= title %>
     </title>
@@ -14,43 +17,69 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100">
     <header>
         <%- include("header.ejs") %>
-        <div class="flex justify-end">
-            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">Sign Out</a>
-        </div>
+
     </header>
-    <div class="flex justify-end">
-        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">Sign Out</a>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+        <% if (role==='educator' ) { %>
+            <a href="/adminhome"
+                class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+                to Home</a>
+            <% } else { %>
+                <a href="/studenthome"
+                    class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+                    to Home</a>
+                <% } %>
     </div>
     <div class="mx-20 my-10 gap-1">
         <div id="page-container">
-            <% if (pages.length > 0) { %>
+            <% if (pages.length> 0) { %>
                 <% pages.forEach(function(page, index) { %>
-                    <div class="page hidden"> 
-                           <div class="hover-bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
-                                <h2 class="mb-2 mx-25 text-lg font-bold">Page <%= index + 1 %>: <%= page.title %></h2>
-                                <p class="col-span-2 mx-100 text-lg text-gray-600"><%= page.content %></p>
-                            </div>
+                    <div class="page hidden">
+                        <div
+                            class="hover-bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
+                            <h2 class="mb-2 mx-25 text-center text-lg font-bold">Page <%= index + 1 %>: <%= page.title
+                                        %>
+                            </h2>
+                            <p class="col-span-2 mx-100 text-lg text-gray-600">
+                                <%= page.content %>
+                            </p>
+                        </div>
+                        <% if (role !=='educator' ) { %>
+                            <form id="markAsCompletedForm" action="/markascompleted" method="POST">
+                                <input type="hidden" name="chapterId" value="<%= chapterId %>">
+                                <input type="hidden" name="courseId" value="<%= courseId %>">
+                                <input type="hidden" name="userId" value="<%= userId %>">
+                                <input type="hidden" name="pageId" value="<%= page.id %>">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <% if (page.completed) { %>
+                                    <button class="rounded-lg border text-center border-gray-300 bg-white p-3" disabled>
+                                        Completed
+                                    </button>
+                                    <% } else { %>
+                                        <button class="rounded-lg border text-center border-gray-300 bg-white p-3"
+                                            id="markascompleted-button"
+                                            onclick="markAsCompleted('<%= chapterId %>', '<%= courseId %>', '<%= userId %>', '<%= page.id %>')"
+                                            data-page-complete="<%= page.completed ? 'true' : 'false' %>">
+                                            Mark as Completed
+                                        </button>
+                                        <% } %>
+                            </form>
+                            <% } %>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <p class="col-span-2 mx-100 text-lg text-gray-600">No Pages available.</p>
-            <% } %>
+                    <% }); %>
+                        <% } else { %>
+                            <p class="col-span-2 mx-100 text-lg text-gray-600">No Pages available.</p>
+                            <% } %>
         </div>
-        
-        <div class="absolute bottom-10 left-10 right-10 rounded-lg border border-gray-300 bg-white p-4 text-center">
-            <button class="rounded-lg border border-gray-300 bg-white p-3 absolute left-2" id="prev-button" onclick="showPreviousPage()">Previous</button>
-            <button class="rounded-lg border border-gray-300 bg-white p-3 mx-auto" id="markascompleted-button" onclick="markAsCompleted()">Mark as Completed</button>
-            <button class="rounded-lg border border-gray-300 bg-white p-3 w-28 absolute right-2" id="next-button" onclick="showNextPage()">Next</button>
-        </div>
-        
-       
     </div>
-    
     <footer>
-        <%- include("footer.ejs") %>
+        <%- include('footer.ejs') %>
     </footer>
     <script>
         const pages = document.querySelectorAll(".page");
@@ -67,28 +96,42 @@
             currentPageIndex = pageIndex;
         }
 
-        function showNextPage() {
-            if (currentPageIndex < pages.length - 1) {
-                showPage(currentPageIndex + 1);
-            }
-        }
-
-        function showPreviousPage() {
-            if (currentPageIndex > 0) {
-                showPage(currentPageIndex - 1);
-            }
-        }
-
-        function markAsCompleted() {
+        function markAsCompleted(chapterId, courseId, userId, pageId) {
             const markAsCompletedButton = document.getElementById("markascompleted-button");
-            markAsCompletedButton.innerHTML = `
-                
-                Completed
-            `;
-            markAsCompletedButton.disabled = true;
+            const pageComplete = markAsCompletedButton.getAttribute("data-page-complete");
+
+            // Check if the page is already completed
+            document.querySelector('input[name="pageId"]').value = pageId;
+            if (pageComplete === "true") {
+                alert("Page is already completed");
+                return;
+            }
+
+            fetch(`/markascompleted`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': '<%= csrfToken %>',
+                },
+                body: JSON.stringify({ chapterId, courseId, userId, pageId }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to mark page as completed');
+                    }
+
+                    markAsCompletedButton.innerHTML = 'Completed';
+                    markAsCompletedButton.disabled = true;
+                    alert("Page marked as completed successfully");
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Already page marked as completed");
+                });
         }
-        
+
         showPage(0);
     </script>
 </body>
+
 </html>

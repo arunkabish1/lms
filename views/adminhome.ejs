@@ -12,16 +12,15 @@
 </head>
 <body>
     <header>
+        
         <%- include("header.ejs") %>
-        <div class="flex justify-end">
-            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-        </div>
     </header>
+    <div class="flex justify-end gap-1">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+    </div>
     <div >    
         <main>
-            <div class="flex justify-end">
-                <a href="/signout" class="text-lg font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-            </div>
+            
             <h1 class="text-center py-4 text-3xl font-bold ">Welcome to admin home <%= educator %> :)</h1>
             
             <div class="text-center py-4 mt-12 " >
@@ -30,15 +29,9 @@
                         <p class="rounded-full border-2 p-2 bg-gray-600 text-center py-4 text-white"> <%= messages.success[i] %></p>
                     <% } %>
                   <% } %>
-                  
-                <% if(messages && messages.error && messages.error.length > 0)  { %>
-                    <% for(var i=0; i<messages.error.length; i++) { %>
-                        <p class="rounded-full border-2 p-2 bg-gray-600 text-center py-4 text-white"> <%= messages.error[i] %></p>
-                    <% } %>
-                  <% } %>
             </div>
             <div class="mx-4 mt-8">
-                <h2 class="mx-28 text-2xl  font-semibold">Admin Menu</h2>
+                <h2 class="mx-28 text-2xl font-semibold">Admin Menu</h2>
                 <br>
                 <div class="w-96 bg-gradient-to-r from-purple-500 to-indigo-500 p-2 rounded text-center text-white hover:from-purple-700 hover:to-indigo-700 transition duration-300">
                     <a href="/create-course" class="text-lg font-semibold">Create New Course</a>
@@ -47,7 +40,7 @@
                     <a href="/admincourses" class="text-lg font-semibold">My Courses</a>
                 </div>
                 <div class="w-96 bg-gradient-to-r from-yellow-500 to-red-500 p-2 mt-4 rounded-lg text-center text-white hover:from-yellow-700 hover:to-red-700 transition duration-300">
-                    <a href="/adminhome" class="text-lg font-semibold">Report</a>
+                    <a href="/report" class="text-lg font-semibold">Report</a>
                 </div>
                 <div class="w-96 bg-gradient-to-r from-yellow-500 to-red-500 p-2 mt-4 rounded-lg text-center text-white hover:from-yellow-700 hover:to-red-700 transition duration-300">
                     <a href="/changepass" class="text-lg font-semibold">Change Password</a>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,69 +10,68 @@
         <%= title %>
     </title>
 </head>
+
 <body class="bg-gray-100">
     <header>
         <%- include("header.ejs") %>
-        <div class="flex justify-end">
-            <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
-        </div>
     </header>
-    <div class="flex justify-end">
-        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 mb-4">signout</a>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+        <a href="/adminhome"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+            to Home</a>
     </div>
-    <div class="max-w-md mx-auto mt-10">
-        <form action="/create-chapter" class="p-6 bg-white shadow-lg rounded-lg flex flex-col items-center space-y-4" method="POST">
+
+    <div class="max-w-3xl mx-auto mt-10 flex justify-between">
+
+        <form action="/create-chapter"
+            class="w-1/2 p-6 -ml-96 bg-white shadow-lg rounded-lg flex flex-col items-center space-y-4" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <h1 class="text-2xl font-semibold text-gray-800">Create a New Chapter</h1>
             <div class="w-full">
                 <label for="title" class="text-sm text-gray-600">Chapter Title</label>
-                <input type="text" id="title" name="title" placeholder="Enter the Chapter Title"
+                <input type="text" id="title" name="title" required placeholder="Enter the Chapter Title"
                     class="w-full px-4 py-2 mt-1 rounded-md border required border-gray-300 focus:outline-none focus:border-blue-500">
             </div>
             <div class="w-full">
                 <label for="description" class="text-sm text-gray-600">Chapter Description</label>
-                <textarea id="description" name="description" placeholder="Enter the Chapter Description"
+                <textarea id="description" name="description" required placeholder="Enter the Chapter Description"
                     class="w-full px-4 py-2 mt-1 rounded-md border required border-gray-300 focus:outline-none focus:border-blue-500"
                     rows="4"></textarea>
             </div>
             <input type="hidden" name="courseId" value="<%= courseId %>">
             <button type="submit"
-                class="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-green-600 focus:outline-none">Create Chapter</button>
-                <br><hr><br>
-                <div class="text-center" >
-                    <% if(messages && messages.success && messages.success.length > 0)  { %>
-                        <% for(var i=0; i<messages.success.length; i++) { %>
-                            <p class="rounded-full border-2 p-2 bg-gray-600 text-center text-white"> <%= messages.success[i] %></p>
-                        <% } %>
-                      <% } %>
-                      
-                    <% if(messages && messages.error && messages.error.length > 0)  { %>
-                        <% for(var i=0; i<messages.error.length; i++) { %>
-                            <p class="rounded-full border-2 p-2 bg-gray-600 text-center text-white"> <%= messages.error[i] %></p>
-                        <% } %>
-                      <% } %>
-                </div>
-            </form>
-        <div class="mt-6">
+                class="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-green-600 focus:outline-none">Create
+                Chapter</button>
+        </form>
+
+        <div class="w-1/2">
             <h2 class="text-2xl font-semibold text-gray-800">Created Chapters</h2>
             <ul>
-                <% chapters.forEach(chapter => { %>
+                <% chapters.forEach(chapter=> { %>
                     <li class="border border-gray-300 p-4 mt-2 flex items-center justify-between">
                         <div>
-                            <p class="text-lg font-semibold"><%= chapter.title %></p>
-                            <p><%= chapter.description %></p>
+                            <p class="text-lg font-semibold">
+                                <%= chapter.title %>
+                            </p>
+                            <p>
+                                <%= chapter.description %>
+                            </p>
                         </div>
                         <div>
-                            <a href="/edit-chapter?chapterId=<%= chapter.id %>" class="text-blue-500 font-bold mr-2">Edit</a>
-                            <a href="/create-page?chapterId=<%= chapter.id %>" class="text-green-500 font-bold">Add Page</a>
+                            <a href="/create-page?chapterId=<%= chapter.id %>&courseId=<%= courseId %>"
+                                class="text-green-500 font-bold">Add Page</a>
                         </div>
                     </li>
-                <% }); %>
+                    <% }); %>
             </ul>
         </div>
     </div>
+
     <footer>
         <%- include("footer.ejs") %>
     </footer>
 </body>
+
 </html>

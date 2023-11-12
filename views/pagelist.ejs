@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <style>
+        button:hover {
+            background-color: #a58142;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <header>
+        <%- include("header.ejs") %>
+    </header>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+        <% if (role==='educator' ) { %>
+            <a href="/adminhome"
+                class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+                to Home</a>
+            <% } else { %>
+                <a href="/studenthome"
+                    class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+                    to Home</a>
+                <% } %>
+    </div>
+    <div class="mx-20 my-10 gap-1">
+
+        <div id="page-container">
+            <h1 class="mb-4 text-center text-3xl font-bold text-gray-800">Pages in <%= chapter.title %>
+            </h1>
+            <% if (pages.length> 0) { %>
+                <% pages.forEach(function(page, index) { %>
+                    <div>
+                        <a
+                            href="/adminpages?chapterId=<%= chapter.id %>&pageId=<%= page.id %>&courseId=<%= courseId %>">
+                            <input type="hidden" name="pageId" value="<%= page.id %>">
+                            <div
+                                class="hover:bg-blue-200 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-500 bg-white p-4">
+                                <h2 class="mb-2 mx-25 text-lg font-bold">Page <%= index + 1 %>: <%= page.title %>
+                                </h2>
+                            </div>
+                        </a>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <p class="col-span-2 mx-100 text-lg text-gray-600">No Pages available.</p>
+                            <% } %>
+        </div>
+        <!-- for chapter wise markascompleted but later i changed it to page wise -->
+        <!-- <form id="markAsCompletedForm" action="/markascompleted" method="POST">
+            <input type="hidden" name="chapterId" value="<%= chapter.id %>">
+            <input type="hidden" name="courseId" value="<%= courseId %>">
+            <input type="hidden" name="userId" value="<%= userId %>">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="rounded-lg border border-gray-300 bg-white p-3"
+            id="markascompleted-button"
+            data-chapter-complete="<%= chapter.isCompleted %>"
+            <%= chapter.isCompleted ? 'disabled' : '' %>
+            >
+                Mark as Completed
+            </button>
+
+        </form> -->
+    </div>
+    <footer>
+        <%- include('footer.ejs') %>
+    </footer>
+    <!-- for chapter wise markascompleted -->
+    <!-- <script> -->
+    <!-- // function markAsCompleted() {
+    // const chapterId = '<%= chapter.id %>';
+        // const chapterComplete =
+        document.getElementById("markascompleted-button").getAttribute("data-chapter-complete");
+        // if (chapterComplete === "true") {
+        // alert("Chapter is already completed");
+        // return;
+        // }
+        // fetch('/markascompleted/${chapterId}/${courseId}/${userId}', {
+        // method: 'POST',
+        // headers: {
+        // 'Content-Type': 'application/json',
+        // 'CSRF-Token': '<%= csrfToken %>',
+            // },
+
+            // })
+
+            // .then(response => {
+            // if (!response.ok) {
+            // throw new Error('Failed to mark chapter as completed');
+            // }
+            // // Update the button or perform any other actions if needed
+            // document.getElementById("markascompleted-button").setAttribute("data-chapter-complete", "true");
+            // alert("Chapter marked as completed successfully");
+            // })
+            // .catch(error => {
+            // console.error('Error:', error);
+            // alert("already to mark chapter as completed");
+            // });
+            // } -->
+    <!-- </script> -->
+
+</body>
+
+</html>
