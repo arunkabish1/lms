@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <title>Course create</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body>
     <header>
         <%- include("header.ejs") %>
@@ -47,6 +49,14 @@
                         </p>
                         <% } %>
                             <% } %>
+                                <% if(messages && messages.error && messages.error.length> 0) { %>
+                                    <% for(var i=0; i<messages.error.length; i++) { %>
+                                        <p class="rounded-full border-2 p-2 bg-red-600 text-center text-white">
+                                            <%= messages.error[i] %>
+                                        </p>
+                                        <% } %>
+                                            <% } %>
+
             </div>
             </form>
     </div>

@@ -7,7 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<%= csrfToken %>" />
-    <title><%= title %></title>
+    <title>
+        <%= title %>
+    </title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
 
@@ -29,21 +31,46 @@
 
         <div class="mb-4">
             <p class="font-semibold">Total Pages:</p>
-            <p><%= pagesCount %></p>
+            <p>
+                <%= pagesCount %>
+            </p>
         </div>
 
         <div class="mb-4">
             <p class="font-semibold">Completed Pages:</p>
-            <p><%= completedPagesCount %></p>
+            <p>
+                <%= completedPagesCount %>
+            </p>
         </div>
 
         <div>
             <p class="font-semibold">Completion Percentage:</p>
-            <p><%= completionPercentage.toFixed(2) %>%</p>
+            <p>
+                <%= completionPercentage.toFixed(2) %>%
+            </p>
         </div>
 
         <div class="mt-8">
-            <a href="/chapter-view?courseId=<%= courseId %>" class="text-white bg-blue-500 hover:bg-blue-700 py-2 px-4 rounded">
+            <h2 class="text-xl font-bold mb-4">Course Timeline</h2>
+            <div class="flex space-x-4">
+                <% for (let i=1; i <=pagesCount; i++) { %>
+                    <div class="flex-shrink-0 w-8 h-8 border-2 border-gray-500 rounded-full text-center">
+                        <% if (i <=completedPagesCount) { %>
+                            <div class="w-full h-full bg-green-500 rounded-full"></div>
+                            <% } else { %>
+                                <div class="w-full h-full border-2 border-gray-500 rounded-full"></div>
+                                <% } %>
+                                    <p class="text-xs">
+                                        <%= i %>
+                                    </p>
+                    </div>
+                    <% } %>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <a href="/chapter-view?courseId=<%= courseId %>"
+                class="text-white bg-blue-500 hover:bg-blue-700 py-2 px-4 rounded">
                 View Course
             </a>
         </div>

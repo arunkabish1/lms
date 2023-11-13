@@ -392,7 +392,7 @@ app.get("/adminpages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
       pageId: requestedPageId,
     },
   });
-  
+
   try {
     const chapter = await Chapter.findByPk(chapterId);
 
@@ -415,7 +415,7 @@ app.get("/adminpages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
       chapter,
       role,
       page,
-      registeredPage:registeredPage,
+      registeredPage: registeredPage,
       chapterId,
       chapterTitle,
       pageTitle,
@@ -581,7 +581,7 @@ app.post(
       );
       return res.redirect("/login");
     }
-    if( req.user.role !== req.body.role){
+    if (req.user.role !== req.body.role) {
       req.flash("error", "Check your Role");
       return res.redirect("/login");
     }
@@ -930,7 +930,6 @@ app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const role = req.user.role;
   const courseId = req.query.courseId;
 
-  // Function to fetch registered pages for a user
   async function fetchRegisteredPages(userId) {
     try {
       // Implement your logic to fetch registered pages here
@@ -951,7 +950,6 @@ app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     const chapter = await Chapter.findByPk(chapterId);
     const pages = await Page.findAll({ where: { chapterId } });
 
-    // Fetch registered pages for the current user
     const registeredPages = await fetchRegisteredPages(userId);
 
     res.render("pagelist", {
@@ -1052,7 +1050,6 @@ app.get("/displayc", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       userRole,
       userId,
       pages,
-      title: "",
       csrfToken: req.csrfToken(),
       userName,
       currentUser,
@@ -1157,6 +1154,16 @@ app.get('/report', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   try {
     const educatorCourses = await Course.findAll({ where: { userId: req.user.id } });
 
+    if (educatorCourses.length === 0) {
+      res.render('report', {
+        educatorCourses: [],
+        csrfToken: req.csrfToken(),
+        courseId: req.query.courseId,
+        noCoursesFound: true,
+      });
+      return;
+    }
+
     const coursesWithEnrollmentCount = await Promise.all(
       educatorCourses.map(async (course) => {
         const enrollmentCount = await Register.count({ where: { courseId: course.id } });
@@ -1165,6 +1172,16 @@ app.get('/report', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     );
 
     const sortedCourses = coursesWithEnrollmentCount.sort((a, b) => b.enrollmentCount - a.enrollmentCount);
+
+    if (!sortedCourses[0]) {
+      res.render('report', {
+        educatorCourses: [],
+        csrfToken: req.csrfToken(),
+        courseId: req.query.courseId,
+        noCoursesFound: true,
+      });
+      return;
+    }
 
     const maxEnrollmentCount = sortedCourses[0].enrollmentCount;
     const coursesWithPopularity = sortedCourses.map((item) => ({
@@ -1179,7 +1196,8 @@ app.get('/report', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     });
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).send('Internal Server Error');
+    req.flash('error', 'An error occurred while fetching courses');
+    res.redirect('/adminhome');
   }
 });
 
@@ -1216,7 +1234,7 @@ app.post('/markascompleted', connectEnsureLogin.ensureLoggedIn(), async (req, re
         chapterId: chapterId,
         iscomplete: true,
       });
-      console.log('New row created and marked as completed successfully');
+      console.log('New row created and marked as completed');
     }
 
     res.redirect(`/pagelist?chapterId=${chapterId}&courseId=${courseId}`);
