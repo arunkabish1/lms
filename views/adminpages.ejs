@@ -21,7 +21,6 @@
 <body class="bg-gray-100">
     <header>
         <%- include("header.ejs") %>
-
     </header>
     <div class="flex justify-end gap-1">
         <a href="/signout"
@@ -38,44 +37,44 @@
     </div>
     <div class="mx-20 my-10 gap-1">
         <div id="page-container">
-            <% if (pages.length> 0) { %>
-                <% pages.forEach(function(page, index) { %>
-                    <div class="page hidden">
-                        <div
-                            class="hover-bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
-                            <h2 class="mb-2 mx-25 text-center text-lg font-bold">Page <%= index + 1 %>: <%= page.title
-                                        %>
-                            </h2>
-                            <p class="col-span-2 mx-100 text-lg text-gray-600">
-                                <%= page.content %>
-                            </p>
-                        </div>
-                        <% if (role !=='educator' ) { %>
-                            <form id="markAsCompletedForm" action="/markascompleted" method="POST">
-                                <input type="hidden" name="chapterId" value="<%= chapterId %>">
-                                <input type="hidden" name="courseId" value="<%= courseId %>">
-                                <input type="hidden" name="userId" value="<%= userId %>">
-                                <input type="hidden" name="pageId" value="<%= page.id %>">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <% if (page.completed) { %>
-                                    <button class="rounded-lg border text-center border-gray-300 bg-white p-3" disabled>
-                                        Completed
-                                    </button>
-                                    <% } else { %>
-                                        <button class="rounded-lg border text-center border-gray-300 bg-white p-3"
-                                            id="markascompleted-button"
-                                            onclick="markAsCompleted('<%= chapterId %>', '<%= courseId %>', '<%= userId %>', '<%= page.id %>')"
-                                            data-page-complete="<%= page.completed ? 'true' : 'false' %>">
-                                            Mark as Completed
-                                        </button>
-                                        <% } %>
-                            </form>
-                            <% } %>
+            <% if (page !==null) { %>
+                <div class="page">
+                    <div
+                        class="hover-bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
+                        <h2 class="mb-2 mx-25 text-center text-lg font-bold">Page: <%= page.title %>
+                        </h2>
+                        <p class="col-span-2 mx-100 text-lg text-gray-600">
+                            <%= page.content %>
+                        </p>
                     </div>
-                    <% }); %>
-                        <% } else { %>
-                            <p class="col-span-2 mx-100 text-lg text-gray-600">No Pages available.</p>
-                            <% } %>
+                    <% if (role==='educator' ) { %>
+                        <a class="rounded-lg border text-center border-gray-300 bg-white p-3"
+                            href="/pagelist?chapterId=<%= chapter.id %>&courseId=<%= courseId %>">Back</a>
+                        <% } %>
+                            <% if (role !=='educator' ) { %>
+                                <form id="markAsCompletedForm" action="/markascompleted" method="POST">
+                                    <input type="hidden" name="chapterId" value="<%= chapterId %>">
+                                    <input type="hidden" name="courseId" value="<%= courseId %>">
+                                    <input type="hidden" name="userId" value="<%= userId %>">
+                                    <input type="hidden" name="pageId" value="<%= page.id %>">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <% if (page.completed) { %>
+                                        <button
+                                            class="rounded-lg border text-center border-gray-300 bg-white p-3">Completed</button>
+                                        <% } else { %>
+                                            <button class="rounded-lg border text-center border-gray-300 bg-white p-3"
+                                                id="markascompleted-button"
+                                                onclick="markAsCompleted('<%= chapterId %>', '<%= courseId %>', '<%= userId %>', '<%= page.id %>')"
+                                                data-page-complete="<%= page.completed ? 'true' : 'false' %>">
+                                                Mark as Completed
+                                            </button>
+                                            <% } %>
+                                </form>
+                                <% } %>
+                </div>
+                <% } else { %>
+                    <p class="col-span-2 mx-100 text-lg text-gray-600">No Pages available.</p>
+                    <% } %>
         </div>
     </div>
     <footer>
@@ -83,27 +82,19 @@
     </footer>
     <script>
         const pages = document.querySelectorAll(".page");
-        let currentPageIndex = 0;
-
-        function showPage(pageIndex) {
-            pages.forEach((page, index) => {
-                if (index === pageIndex) {
-                    page.classList.remove("hidden");
-                } else {
-                    page.classList.add("hidden");
-                }
-            });
-            currentPageIndex = pageIndex;
-        }
 
         function markAsCompleted(chapterId, courseId, userId, pageId) {
             const markAsCompletedButton = document.getElementById("markascompleted-button");
-            const pageComplete = markAsCompletedButton.getAttribute("data-page-complete");
 
-            // Check if the page is already completed
             document.querySelector('input[name="pageId"]').value = pageId;
-            if (pageComplete === "true") {
+
+            if (markAsCompletedButton.disabled) {
                 alert("Page is already completed");
+                return;
+            }
+
+            if (isPageRegistered(userId, pageId)) {
+                alert("You are already registered for this page");
                 return;
             }
 
@@ -129,9 +120,10 @@
                     alert("Already page marked as completed");
                 });
         }
-
-        showPage(0);
     </script>
+
+
+
 </body>
 
 </html>

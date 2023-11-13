@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-undef
 const express = require("express");
 var csrf = require("tiny-csrf");
 const app = express();
@@ -162,15 +161,17 @@ app.get(
   async (req, res) => {
     const courseId = req.query.courseId;
     const chapters = await Chapter.findAll({ where: { courseId } });
-
+    const userId = req.user.id;
     if (!courseId) {
       return res.status(400).json({ error: "Course ID is missing" });
     }
 
     res.render("create-chapter", {
       courseId,
+
       messages: req.flash(),
       chapters,
+      userId,
       title: "Create Chapter",
       csrfToken: req.csrfToken(),
     });
@@ -263,6 +264,7 @@ app.get(
       const chapter = await Chapter.findByPk(chapterId);
       const pages = await Page.findAll({ where: { chapterId } });
       const courseId = req.query.courseId;
+      const userId = req.user.id;
       console.log(courseId);
       console.log(chapterId);
 
@@ -277,6 +279,7 @@ app.get(
         chapterId,
         chapterTitle: chapter.title,
         pages,
+        userId,
         title: "Create Page",
         csrfToken: req.csrfToken(),
       });
@@ -377,48 +380,47 @@ app.get(
     }
   }
 );
-app.get(
-  "/adminpages",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (req, res) => {
-    const chapterId = req.query.chapterId;
-    const courseId = req.query.courseId;
-    const userId = req.user.id;
-    const role = req.user.role;
+app.get("/adminpages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const chapterId = req.query.chapterId;
+  const courseId = req.query.courseId;
+  const userId = req.user.id;
+  const role = req.user.role;
+  const requestedPageId = req.query.pageId;
 
-    try {
-      const chapter = await Chapter.findByPk(chapterId);
+  try {
+    const chapter = await Chapter.findByPk(chapterId);
 
-      const pages = await Page.findAll({ where: { chapterId } });
-      const pageTitle = Page.title;
-      const pageContent = Page.content;
-      const chapterTitle = chapter.title;
-      const pageId = pages.length > 0 ? pages[0] : null;
-      console.log(pageId);
-      const page = pageId ? await Page.findByPk(pageId.id) : null;
-      res.render("adminpages", {
-        messages: req.flash(),
+    const page = requestedPageId
+      ? await Page.findByPk(requestedPageId)
+      : await Page.findOne({ where: { chapterId }, order: [["createdAt", "ASC"]] });
 
-        pages,
-        userId,
-        pageId: pageId ? pageId.id : null,
-        courseId,
-        chapter,
-        role,
-        page,
-        chapterId,
-        chapterTitle,
-        pageTitle,
-        pageContent,
-        title: "Admin Pages",
-        csrfToken: req.csrfToken(),
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "Error Occured" });
-    }
+    const pages = page ? [page] : [];
+
+    const pageTitle = page ? page.title : "";
+    const pageContent = page ? page.content : "";
+    const chapterTitle = chapter.title;
+
+    res.render("adminpages", {
+      messages: req.flash(),
+      pages,
+      userId,
+      pageId: page ? page.id : null,
+      courseId,
+      chapter,
+      role,
+      page,
+      chapterId,
+      chapterTitle,
+      pageTitle,
+      pageContent,
+      title: "Admin Pages",
+      csrfToken: req.csrfToken(),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Error Occurred" });
   }
-);
+});
 
 // studenthome
 app.get(
@@ -489,7 +491,7 @@ app.get("/users", (req, res) => {
     csrfToken: req.csrfToken(),
   });
 });
-app.post("/users", async (req, res) => {
+app.post("/users", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   if (req.body.email.length == 0) {
     req.flash("error", "Email can not be empty!");
     return res.redirect("/signup");
@@ -554,6 +556,17 @@ app.post(
     failureFlash: true,
   }),
   (req, res) => {
+    if (email.length == 0) {
+      req.flash("error", "Email not be empty!");
+      return res.redirect("/login");
+    }
+    if (password.length <= 0) {
+      req.flash(
+        "error",
+        "passoword can not be empty!"
+      );
+      return res.redirect("/login");
+    }
     console.log(req.user);
     if (req.user.role === req.body.role) {
       if (req.body.role === "student") {
@@ -1090,6 +1103,7 @@ app.get('/progress/:courseId', connectEnsureLogin.ensureLoggedIn(), async (req, 
       title: 'Course Progress',
       courseId: courseId,
       coursename,
+      csrfToken: req.csrfToken(),
       pagesCount: pagesCount,
       completedPagesCount: completedPagesCount,
       completionPercentage: completionPercentage,
@@ -1124,6 +1138,7 @@ app.get('/report', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 
     res.render('report', {
       educatorCourses: coursesWithPopularity,
+      csrfToken: req.csrfToken(),
     });
   } catch (error) {
     console.error('Error:', error);
@@ -1170,8 +1185,7 @@ app.post('/markascompleted', connectEnsureLogin.ensureLoggedIn(), async (req, re
     res.redirect(`/pagelist?chapterId=${chapterId}&courseId=${courseId}`);
   } catch (error) {
     console.error('Error:', error);
-    // Send an error response
-    res.status(500).send('Failed to mark page as completed');
+    res.status(500).send('Failed to mark as completed');
   }
 });
 
