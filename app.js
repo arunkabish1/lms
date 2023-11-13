@@ -491,7 +491,7 @@ app.get("/users", (req, res) => {
     csrfToken: req.csrfToken(),
   });
 });
-app.post("/users", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.post("/users", async (req, res) => {
   if (req.body.email.length == 0) {
     req.flash("error", "Email can not be empty!");
     return res.redirect("/signup");
@@ -537,6 +537,8 @@ app.post("/users", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ error: "Error Occured" });
+
   }
 });
 
@@ -609,7 +611,7 @@ app.post(
     } else {
       console.log("Flash messages:", req.flash());
       req.flash("error", "Check your credentials");
-      res.redirect("/login");
+      // res.redirect("/login");
     }
   }
 );
@@ -913,6 +915,8 @@ app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 
   try {
     const chapter = await Chapter.findByPk(chapterId);
+    const userId = req.user.id;
+    const courseId = req.query.courseId;
 
     const pages = await Page.findAll({ where: { chapterId } });
     const pageTitle = Page.title;
