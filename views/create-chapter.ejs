@@ -23,10 +23,11 @@
             to Home</a>
     </div>
 
-    <div class="max-w-3xl mx-auto mt-10 flex justify-between">
+    <div class="max-w-4xl gap-12 mx-auto mt-10 flex justify-between">
 
         <form action="/create-chapter"
-            class="w-1/2 p-6 -ml-96 bg-white shadow-lg rounded-lg flex flex-col items-center space-y-4" method="POST">
+            class="w-full max-w-md p-6 bg-white shadow-lg rounded-lg flex flex-col items-center space-y-4 mx-auto"
+            method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <h1 class="text-2xl font-semibold text-gray-800">Create a New Chapter</h1>
             <div class="w-full">

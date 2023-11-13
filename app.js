@@ -386,7 +386,13 @@ app.get("/adminpages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
   const userId = req.user.id;
   const role = req.user.role;
   const requestedPageId = req.query.pageId;
-
+  const registeredPage = await Regpages.findOne({
+    where: {
+      userId,
+      pageId: requestedPageId,
+    },
+  });
+  
   try {
     const chapter = await Chapter.findByPk(chapterId);
 
@@ -409,6 +415,7 @@ app.get("/adminpages", connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
       chapter,
       role,
       page,
+      registeredPage:registeredPage,
       chapterId,
       chapterTitle,
       pageTitle,
@@ -492,41 +499,46 @@ app.get("/users", (req, res) => {
   });
 });
 app.post("/users", async (req, res) => {
-  if (req.body.email.length == 0) {
-    req.flash("error", "Email can not be empty!");
-    return res.redirect("/signup");
-  }
-
-  if (req.body.name.length == 0) {
-    req.flash("error", "Name must be filled!");
-    return res.redirect("/signup");
-  }
-  if (req.body.password.length <= 8) {
-    req.flash(
-      "error",
-      "password is not strong as it is less than 8 characters"
-    );
-    return res.redirect("/signup");
-  }
-  const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-  console.log(hashedPassword);
-
-  console.log("name", req.body.name);
-  console.log("email", req.body.email);
-  console.log("password", req.body.password);
-  console.log("role", req.body.role);
   try {
+    const existingUser = await User.findOne({
+      where: {
+        email: req.body.email,
+      },
+    });
+
+    if (existingUser) {
+      req.flash("error", "Email already exists!");
+      return res.redirect("/signup");
+    }
+
+    if (req.body.email.length == 0) {
+      req.flash("error", "Email cannot be empty!");
+      return res.redirect("/signup");
+    }
+    if (req.body.name.length == 0) {
+      req.flash("error", "Name must be filled!");
+      return res.redirect("/signup");
+    }
+    if (req.body.password.length <= 8) {
+      req.flash("error", "Password is not strong as it is less than 8 characters");
+      return res.redirect("/signup");
+    }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+
     const user = await User.create({
       name: req.body.name,
       email: req.body.email,
       password: hashedPassword,
       role: req.body.role,
     });
+
     req.login(user, (err) => {
       if (err) {
-        console.log(err);
+        console.error(err);
         res.redirect("/signup");
       }
+
       if (req.body.role === "student") {
         req.flash("success", "Student Account created successfully");
         res.redirect("/studenthome");
@@ -537,10 +549,10 @@ app.post("/users", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Error Occured" });
-
+    return res.status(500).json({ error: "Error Occurred" });
   }
 });
+
 
 // login and session
 app.get("/login", (req, res) => {
@@ -567,6 +579,10 @@ app.post(
         "error",
         "passoword can not be empty!"
       );
+      return res.redirect("/login");
+    }
+    if( req.user.role !== req.body.role){
+      req.flash("error", "Check your Role");
       return res.redirect("/login");
     }
     console.log(req.user);
@@ -611,7 +627,7 @@ app.post(
     } else {
       console.log("Flash messages:", req.flash());
       req.flash("error", "Check your credentials");
-      // res.redirect("/login");
+      res.redirect("/login");
     }
   }
 );
@@ -906,6 +922,7 @@ app.get(
 );
 
 // pagelist
+
 app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const chapterId = req.query.chapterId;
   const pageId = req.query.pageId;
@@ -913,16 +930,30 @@ app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const role = req.user.role;
   const courseId = req.query.courseId;
 
+  // Function to fetch registered pages for a user
+  async function fetchRegisteredPages(userId) {
+    try {
+      // Implement your logic to fetch registered pages here
+      // Example: query your database or use any other method
+      const registeredPages = await Regpages.findAll({
+        where: { userId },
+        attributes: ['pageId'],
+      });
+
+      return registeredPages.map((registeredPage) => registeredPage.pageId);
+    } catch (error) {
+      console.error('Error fetching registered pages:', error);
+      throw error;
+    }
+  }
+
   try {
     const chapter = await Chapter.findByPk(chapterId);
-    const userId = req.user.id;
-    const courseId = req.query.courseId;
-
     const pages = await Page.findAll({ where: { chapterId } });
-    const pageTitle = Page.title;
-    const pageContent = Page.content;
-    const chapterTitle = chapter.title;
-    const pageId = Page.id;
+
+    // Fetch registered pages for the current user
+    const registeredPages = await fetchRegisteredPages(userId);
+
     res.render("pagelist", {
       messages: req.flash(),
       pageId,
@@ -932,17 +963,18 @@ app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
       role,
       courseId,
       chapterId,
-      chapterTitle,
-      pageTitle,
-      pageContent,
+      chapterTitle: chapter.title,
       title: "Pagelist",
       csrfToken: req.csrfToken(),
+      registeredPages,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Error Occured" });
+    return res.status(500).json({ error: "Error Occurred" });
   }
 });
+
+
 // markascompleted by chapters
 // app.post("/markascompleted",  connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 //   try {
@@ -1143,6 +1175,7 @@ app.get('/report', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     res.render('report', {
       educatorCourses: coursesWithPopularity,
       csrfToken: req.csrfToken(),
+      courseId: req.query.courseId,
     });
   } catch (error) {
     console.error('Error:', error);

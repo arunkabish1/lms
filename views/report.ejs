@@ -15,31 +15,46 @@
     </header>
     <div class="flex justify-end gap-1">
         <a href="/signout"
-            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Signout</a>
         <a href="/adminhome"
             class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
             to Home</a>
     </div>
-    <div class="container mx-auto my-36 p-8 bg-white shadow-lg">
-        <h1 class="text-3xl font-bold mb-4">Course Report</h1>
+    <h1 class="text-2xl font-bold mb-4 text-center mt-10">Your Course Module Report</h1>
 
-        <ul class="list-disc pl-4">
+    <% if (educatorCourses.length> 0) { %>
+        <div
+            class="container mx-auto my-10 p-8 bg-white shadow-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <% educatorCourses.forEach((course)=> { %>
-                <li class="mb-4">
-                    <span class="text-lg font-semibold text-blue-700">
-                        <%= course.course.title %>
-                    </span>:
-                    <span class="font-bold text-green-700">
+                <div class="bg-gray-200 p-4 rounded">
+                    <h2 class="text-lg font-semibold text-blue-700">
+                        Course Name: <%= course.course.title %>
+                    </h2>
+                    <p class="font-bold text-green-700">Course Educator: <%= course.course.educator %>
+                    </p>
+                    <p class="font-bold text-green-700">
                         <%= course.enrollmentCount %> users enrolled
-                    </span>
-                    <span class="text-gray-500">Popularity: <%= course.popularityScore.toFixed(2) %>%</span>
-                </li>
+                    </p>
+                    <p class="font-bold text-green-700">Course Created: <%= course.course.createdAt %>
+                    </p>
+                    <p class="font-bold text-green-700">Popularity: <%= course.popularityScore.toFixed(2) %>%</p>
+                    <div class="mt-4">
+                        <input type="hidden" name="courseId" value="<%= course.course.id %>">
+                        <a href="/chapter-view?courseId=<%= course.course.id %>"
+                            class="text-white bg-blue-500 hover:bg-blue-700 py-2 px-4 rounded">
+                            View Course
+                        </a>
+                    </div>
+                </div>
                 <% }); %>
-        </ul>
-    </div>
-    <footer>
-        <%- include("footer.ejs") %>
-    </footer>
+        </div>
+        <% } else { %>
+            <p class="text-center text-xl font-semibold mt-8">No courses available for the educator.</p>
+            <% } %>
+
+                <footer>
+                    <%- include("footer.ejs") %>
+                </footer>
 </body>
 
 </html>

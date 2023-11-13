@@ -7,9 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<%= csrfToken %>" />
-    <title>
-        <%= title %>
-    </title>
+    <title><%= title %></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
 
@@ -23,7 +21,6 @@
         <a href="/studenthome"
             class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
             to Home</a>
-
     </div>
     <div class="bg-gray-200 w-full p-8 rounded shadow-xl">
         <h1 class="text-2xl font-bold mb-4">
@@ -32,23 +29,23 @@
 
         <div class="mb-4">
             <p class="font-semibold">Total Pages:</p>
-            <p>
-                <%= pagesCount %>
-            </p>
+            <p><%= pagesCount %></p>
         </div>
 
         <div class="mb-4">
             <p class="font-semibold">Completed Pages:</p>
-            <p>
-                <%= completedPagesCount %>
-            </p>
+            <p><%= completedPagesCount %></p>
         </div>
 
         <div>
             <p class="font-semibold">Completion Percentage:</p>
-            <p>
-                <%= completionPercentage.toFixed(2) %>%
-            </p>
+            <p><%= completionPercentage.toFixed(2) %>%</p>
+        </div>
+
+        <div class="mt-8">
+            <a href="/chapter-view?courseId=<%= courseId %>" class="text-white bg-blue-500 hover:bg-blue-700 py-2 px-4 rounded">
+                View Course
+            </a>
         </div>
     </div>
     <footer>
