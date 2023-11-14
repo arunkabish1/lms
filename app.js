@@ -9,6 +9,8 @@ const {
   Chapter,
   Page,
   User,
+  Assignment,
+  Answers,
   Register,
   Regpages,
   RegChapter,
@@ -23,6 +25,7 @@ var session = require("express-session");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 const { ESLint } = require("eslint");
+const { hasSubscribers } = require("diagnostics_channel");
 
 const saltRounds = 10;
 app.use(flash());
@@ -928,12 +931,11 @@ app.get("/pagelist", connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const pageId = req.query.pageId;
   const userId = req.user.id;
   const role = req.user.role;
+  console.log("role", role);
   const courseId = req.query.courseId;
 
   async function fetchRegisteredPages(userId) {
     try {
-      // Implement your logic to fetch registered pages here
-      // Example: query your database or use any other method
       const registeredPages = await Regpages.findAll({
         where: { userId },
         attributes: ['pageId'],
@@ -1243,7 +1245,7 @@ app.post('/markascompleted', connectEnsureLogin.ensureLoggedIn(), async (req, re
     res.status(500).send('Failed to mark as completed');
   }
 });
-
+// --------------------OPTIIONAL TRY----------------------
 
 // !------------------------END-----------------------------------!
 // all are formated by prettier

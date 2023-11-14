@@ -1,0 +1,62 @@
+<!-- answer-assignment.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer Assignment</title>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+
+<body class="bg-gray-100">
+    <header>
+        <%- include("header.ejs") %>
+    </header>
+    <div class="flex justify-end gap-1">
+        <a href="/signout" class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Sign out</a>
+    </div>
+
+    <div class="mx-20 my-10 space-y-4">
+        <h1 class="text-2xl font-bold">Answer Assignment</h1>
+        <div id="question-container">
+            <% if (questions.length > 0) { %>
+                <form action="/answer-assignment" method="post" class="space-y-4">
+                    <% questions.forEach((question, index) => { %>
+                        <% console.log('Question:', question); %>
+                        <% if (question.options && question.options.length > 0) { %>
+                            <div class="bg-white p-4 rounded shadow-md">
+                                <h2 class="mb-2 text-center text-lg font-bold">Question <%= index + 1 %></h2>
+                                <p class="mb-4 text-lg text-gray-600"><%= question.question %></p>
+                                <div class="space-y-2">
+                                    <% question.options.forEach((option, optionIndex) => { %>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="radio" name="selectedOptions_<%= index %>" value="<%= option %>" class="form-radio">
+                                            <span><%= option %></span>
+                                        </label><br>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <p class="text-lg text-gray-600">No options available for this question.</p>
+                        <% } %>
+                    <% }); %>
+                    <input type="hidden" name="userId" value="<%= userId %>">
+                    <input type="hidden" name="chapterId" value="<%= chapterId %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Answer</button>
+                </form>
+            <% } else { %>
+                <p class="text-lg text-gray-600">No questions available for this chapter.</p>
+            <% } %>
+        </div>
+    </div>
+    <footer>
+        <%- include("footer.ejs") %>
+    </footer>
+</body>
+
+</html>

@@ -40,12 +40,13 @@
             <% if (page !==null) { %>
                 <div class="page">
                     <div
-                        class="hover-bg-gray-500 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-300 bg-white p-4">
-                        <h2 class="mb-2 mx-25 text-center text-lg font-bold">Page: <%= page.title %>
+                    class="<%= registeredPage ? 'bg-green-200' : 'bg-white' %> hover:bg-blue-100 transition ease-in-out cursor-pointer relative mb-4 rounded-lg border border-gray-500 p-4">
+                    <h2 class="mb-2 mx-25 text-lg text-center font-bold">Page: <%= page.title %>
                         </h2>
-                        <p class="col-span-2 mx-100 text-lg text-gray-600">
-                            <%= page.content %>
+                        <p class="col-span-2 mx-100 text-lg text-gray-600"> contents: <br>
+                            <%= page.content.trim() %>
                         </p>
+                        
                     </div>
                     <% if (role==='educator' ) { %>
                         <a class="rounded-lg border text-center border-gray-300 bg-white p-3"
@@ -58,9 +59,10 @@
                                     <input type="hidden" name="userId" value="<%= userId %>">
                                     <input type="hidden" name="pageId" value="<%= page.id %>">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <% if (page.completed) { %>
+                                    <% if (registeredPage) { %>
                                         <button
                                             class="rounded-lg border text-center border-gray-300 bg-white p-3">Completed</button>
+                                            <p class="col-span-2 mx-100 text-lg text-gray-600">You have completed this page (press completed to go back)</p>
                                         <% } else { %>
                                             <button class="rounded-lg border text-center border-gray-300 bg-white p-3"
                                                 id="markascompleted-button"

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Assignment</title>
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+</head>
+
+<body class="bg-gray-100">
+    <header>
+        <%- include("header.ejs") %>
+    </header>
+    <div class="flex justify-end gap-1">
+        <a href="/signout"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+        <a href="/adminhome"
+            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
+            to Home</a>
+            <a href="/create-chapter?courseId=<%= courseId %>&userId=<%= userId %>""
+                class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">All
+                 Chapters</a>
+    </div>
+    <div class="mx-20 my-10">
+        <h1 class="text-2xl font-bold mb-4">Create Assignment for <%= chapterId %> </h1>
+
+        <form action="/create-assignment" method="POST">
+            <label for="question" class="block mb-2">Question:</label>
+            <textarea id="question" name="question" class="w-full p-2 border rounded mb-4" required></textarea>
+
+            <label for="answer" class="block mb-2">Correct Answer:</label>
+            <input type="text" id="answer" name="answer" class="w-full p-2 border rounded mb-4" required>
+
+            <label for="option1" class="block mb-2">Option 1:</label>
+            <input type="text" id="option1" name="option1" class="w-full p-2 border rounded mb-4" required>
+
+            <label for="option2" class="block mb-2">Option 2:</label>
+            <input type="text" id="option2" name="option2" class="w-full p-2 border rounded mb-4" required>
+
+            <label for="option3" class="block mb-2">Option 3:</label>
+            <input type="text" id="option3" name="option3" class="w-full p-2 border rounded mb-4" required>
+
+            <input type="hidden" name="chapterId" value="<%= chapterId %>">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">Create Assignment</button>
+        </form>
+    </div>
+    <footer>
+        <%- include("footer.ejs") %>
+    </footer>
+</body>
+
+</html>
