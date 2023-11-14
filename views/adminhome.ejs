@@ -27,14 +27,18 @@
             <h1 class="text-center py-4 text-3xl font-bold ">Welcome Educator <%= educator %>
             </h1>
 
-            <div class="text-center py-4 mt-12 ">
-                <% if(messages && messages.success && messages.success.length> 0) { %>
+            <div class="text-center " >
+                <% if(messages && messages.success && messages.success.length > 0)  { %>
                     <% for(var i=0; i<messages.success.length; i++) { %>
-                        <p class="rounded-full border-2 p-2 bg-gray-600 text-center py-4 text-white">
-                            <%= messages.success[i] %>
-                        </p>
-                        <% } %>
-                            <% } %>
+                        <p class="rounded w-96 bg-gray-600 text-center text-white"> <%= messages.success[i] %></p>
+                    <% } %>
+                  <% } %>
+                  
+                <% if(messages && messages.error && messages.error.length > 0)  { %>
+                    <% for(var i=0; i<messages.error.length; i++) { %>
+                        <p class=" rounded w-96 bg-gray-600 text-center text-white"> <%= messages.error[i] %></p>
+                    <% } %>
+                  <% } %>
             </div>
             <div class="mx-4 mt-8">
                 <h2 class="mx-28 text-2xl font-semibold">Admin Menu</h2>
