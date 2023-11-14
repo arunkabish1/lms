@@ -12,17 +12,22 @@
         <%- include("header.ejs") %>
     </header>
     <div class="flex justify-end gap-1">
-        <a href="/signout"
-            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
         <% if (role==='educator' ) { %>
             <a href="/adminhome"
                 class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
                 to Home</a>
             <% } else { %>
+
+                <a href="/progress/<%= course.id %>"
+                    class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Track
+                    Progress</a>
                 <a href="/studenthome"
                     class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
                     to Home</a>
                 <% } %>
+                    <a href="/signout"
+                        class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+
     </div>
 
     <div class="container mx-auto mt-8">

@@ -21,8 +21,6 @@
         <%- include("header.ejs") %>
     </header>
     <div class="flex justify-end gap-1">
-        <a href="/signout"
-            class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
         <a href="/chapter-view?courseId=<%= courseId %>&userId=<%= userId %>&chapterId=<%= chapterId %>"
             class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Chapter
             list </a>
@@ -31,10 +29,17 @@
                 class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
                 to Home</a>
             <% } else { %>
+
+                <a href="/progress/<%= courseId %>"
+                    class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Track
+                    Progress</a>
                 <a href="/studenthome"
                     class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">Back
                     to Home</a>
                 <% } %>
+                    <a href="/signout"
+                        class="text-lg mt-25 font-semibold bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 mt-24 rounded mt-4 mb-4">signout</a>
+
     </div>
     <div class="mx-20 my-10 gap-1">
 
